@@ -1,0 +1,22 @@
+on:
+  push:
+    branches:
+    - main
+    
+jobs:
+  deploy:
+    name: deploy to staging
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install SSH client
+        run: sudo apt-get install openssh-client -y  # For Ubuntu-based runners, adjust for other systems
+      - name: Deploy to Server
+        run: |
+          sshpass -p $SSH_PASSWORD ssh $SSH_USER@$SSH_SERVER "cd /home/project/eventr && git pull origin main"  # Customize this line for your deployment
+      - name: Composer Install
+        run: composer install
+      - name: Start Container
+        run: docker compose up -d
+
