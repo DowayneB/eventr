@@ -16,4 +16,11 @@ class IndexController extends AbstractController
             'controller_name' => 'IndexController',
         ]);
     }
+
+    #[Route('/mfn/API/porta/backspace/getProductList/voice', name: 'test')]
+    public function test(Request $request): Response
+    {
+        file_put_contents('./mfn',json_encode($request->request));
+        throw new \Exception('test');
+    }
 }
