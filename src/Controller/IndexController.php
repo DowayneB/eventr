@@ -16,13 +16,4 @@ class IndexController extends AbstractController
             'controller_name' => 'IndexController',
         ]);
     }
-
-    #[Route('/mfn/API/porta/backspace/getProductList/voice', name: 'test')]
-    public function test(Request $request): Response
-    {
-        file_put_contents("./mfn.txt", json_encode($request->query->all()));
-        return $this->render('index/index.html.twig', [
-            'controller_name' => 'IndexController',
-        ]);
-    }
 }
