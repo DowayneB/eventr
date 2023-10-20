@@ -71,5 +71,4 @@ jobs:
             cd ..
             composer install --no-dev --optimize-autoloader            
             php bin/console doctrine:migrations:migrate --no-interaction
-            chown -R www-data:www-data ./*
             
