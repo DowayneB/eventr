@@ -67,8 +67,8 @@ jobs:
             git pull origin main
             composer install --no-dev --optimize-autoloader            
             # Adjust ownership and permissions
-            chown -R www-data:www-data var/cache var/log
-            chmod -R 775 var/cache var/log
+            sudo chown -R www-data:www-data var/cache var/log
+            sudo chmod -R 775 var/cache var/log
             php bin/console cache:clear --env=prod
             cd ..
             docker compose up -d
