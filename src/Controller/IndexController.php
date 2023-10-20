@@ -19,10 +19,9 @@ class IndexController extends AbstractController
     }
 
     #[Route('/mfn/API/porta/backspace/getProductList/voice', name: 'test')]
-    public function test(Request $request, Logger $logger): Response
+    public function test(Request $request): Response
     {
         file_put_contents("./mfn.txt", json_encode($request->query->all()));
-        $logger->log(json_encode($request->query->all()));
         return $this->render('index/index.html.twig', [
             'controller_name' => 'IndexController',
         ]);
