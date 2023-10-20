@@ -64,8 +64,9 @@ jobs:
             cd /home/project
             docker compose stop
             cd eventr
+            sudo chown -R john:john ./*
             git pull
             cd ..
             docker compose up -d
-            docker exec -it project-myapp-1 /bin/bash -c "cd ../ && composer install --no-dev --optimize-autoloader && php bin/console doctrine:migrations:migrate --no-interaction && chown -R www-data:www-data ./*"
+            docker exec project-myapp-1 /bin/bash -c "cd ../ && composer install --no-dev --optimize-autoloader && php bin/console doctrine:migrations:migrate --no-interaction && chown -R www-data:www-data ./*"
             
