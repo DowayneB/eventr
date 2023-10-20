@@ -67,8 +67,5 @@ jobs:
             git pull
             cd ..
             docker compose up -d
-            docker exec -it project-myapp-1 /bin/bash
-            cd ..
-            composer install --no-dev --optimize-autoloader            
-            php bin/console doctrine:migrations:migrate --no-interaction
+            docker exec -it project-myapp-1 /bin/bash -c "cd ../ && composer install --no-dev --optimize-autoloader && php bin/console doctrine:migrations:migrate --no-interaction && chown -R www-data:www-data ./*"
             
