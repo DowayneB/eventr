@@ -64,7 +64,7 @@ jobs:
             cd /home/project
             docker compose stop
             cd eventr
-            git pull origin main
+            git pull
             docker compose up -d
             docker exec -it project-myapp-1 /bin/bash
             cd ..
