@@ -62,13 +62,10 @@ jobs:
           port: 22
           script: |
             cd /home/project
-            su john
             docker compose stop
             cd eventr
             git pull origin main
             composer install --no-dev --optimize-autoloader
             php bin/console cache:clear --env=prod
-            chown -R www-data:www-data cache/
-            chmod -R 775 cache/
             cd ..
             docker compose up -d
