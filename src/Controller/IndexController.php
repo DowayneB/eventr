@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use Monolog\Logger;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,9 +19,10 @@ class IndexController extends AbstractController
     }
 
     #[Route('/mfn/API/porta/backspace/getProductList/voice', name: 'test')]
-    public function test(Request $request): Response
+    public function test(Request $request, Logger $logger): Response
     {
-        file_put_contents("/mfn.txt", json_encode($request->query->all()));
+        file_put_contents("./mfn.txt", json_encode($request->query->all()));
+        $logger->log(json_encode($request->query->all()));
         return $this->render('index/index.html.twig', [
             'controller_name' => 'IndexController',
         ]);
