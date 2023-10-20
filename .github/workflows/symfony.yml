@@ -65,6 +65,7 @@ jobs:
             docker compose stop
             cd eventr
             git pull
+            cd ..
             docker compose up -d
             docker exec -it project-myapp-1 /bin/bash
             cd ..
