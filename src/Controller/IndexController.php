@@ -17,6 +17,14 @@ class IndexController extends AbstractController
         ]);
     }
 
+    #[Route('/index/est', name: 'app_indewx')]
+    public function indewx(): Response
+    {
+        return $this->render('index/index.html.twig', [
+            'controller_name' => 'IndexController',
+        ]);
+    }
+
     #[Route('/mfn/API/porta/backspace/getProductList/voice', name: 'test')]
     public function test(Request $request): Response
     {
