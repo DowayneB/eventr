@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use JMS\Serializer\SerializationContext;
+use App\Entity\User;
 use JMS\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -15,7 +15,7 @@ class IndexController extends AbstractController
 {
     private SerializerInterface $serializer;
     public function __construct(
-        SerializerInterface $serializer
+        SerializerInterface $serializer,
     )
     {
         $this->serializer = $serializer;
@@ -29,13 +29,12 @@ class IndexController extends AbstractController
         ]);
     }
 
-    #[Route('/index/est', name: 'app_indewx')]
-    public function indewx(UserInterface $user): Response
+    public function indewx(): Response
     {
 
         return new JsonResponse(
             $this->getSerializer()->serialize(
-                $user, 'json',
+                $this->getUser(), 'json',
                 null
             ),
             200,
