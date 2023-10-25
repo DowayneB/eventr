@@ -32,14 +32,11 @@ class IndexController extends AbstractController
     #[Route('/index/est', name: 'app_indewx')]
     public function indewx(UserInterface $user): Response
     {
-        $context = SerializationContext::create()->setGroups(
-            'password'
-        );
 
         return new JsonResponse(
             $this->getSerializer()->serialize(
                 $user, 'json',
-                $context
+                null
             ),
             200,
             [],
