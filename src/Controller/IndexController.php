@@ -2,24 +2,12 @@
 
 namespace App\Controller;
 
-use App\Entity\User;
-use JMS\Serializer\SerializerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\User\UserInterface;
-use const JSON_PRETTY_PRINT;
 
-class IndexController extends AbstractController
+class IndexController extends EventrController
 {
-    private SerializerInterface $serializer;
-    public function __construct(
-        SerializerInterface $serializer,
-    )
-    {
-        $this->serializer = $serializer;
-    }
 
     #[Route('/index', name: 'app_index')]
     public function index(): Response
@@ -41,10 +29,5 @@ class IndexController extends AbstractController
             [],
             JSON_PRETTY_PRINT
         );
-    }
-
-    private function getSerializer(): SerializerInterface
-    {
-        return $this->serializer;
     }
 }
