@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\EventRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event
@@ -99,7 +100,7 @@ class Event
         return $this->user;
     }
 
-    public function setUser(int $user): static
+    public function setUser(User $user): static
     {
         $this->user = $user;
 
@@ -111,7 +112,7 @@ class Event
         return $this->event_type;
     }
 
-    public function setEventType(int $event_type): static
+    public function setEventType(EventType $event_type): static
     {
         $this->event_type = $event_type;
 
