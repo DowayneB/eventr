@@ -6,6 +6,7 @@ use App\Repository\EventRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use JMS\Serializer\Annotation as Serializer;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event
@@ -95,7 +96,7 @@ class Event
         return $this;
     }
 
-    public function getUser(): ?int
+    public function getUser(): ?User
     {
         return $this->user;
     }
@@ -107,7 +108,7 @@ class Event
         return $this;
     }
 
-    public function getEventType(): ?int
+    public function getEventType(): ?EventType
     {
         return $this->event_type;
     }
