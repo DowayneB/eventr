@@ -33,4 +33,14 @@ class EventController extends EventrController
             ]
         );
     }
+
+    #[Route("/my-events", name: 'api_event_list_get', methods: ["GET"])]
+    public function listEvents(EventManager $eventManager): JsonResponse
+    {
+        return $this->makeSerializedResponse(
+            [
+                'event' => $eventManager->getEventsByUser($this->getUser())
+            ]
+        );
+    }
 }
