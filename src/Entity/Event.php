@@ -31,10 +31,12 @@ class Event
     private ?\DateTimeInterface $rsvp_date = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $created_at = null;
+    #[Timestampable(on: 'create')]
+    private \DateTimeInterface $created_at;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $updated_at = null;
+    #[Timestampable(on: 'update')]
+    private \DateTimeInterface $updated_at;
 
     public function getId(): ?int
     {
