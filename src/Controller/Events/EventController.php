@@ -10,16 +10,18 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route("/api/event/", name: "event_main")]
+#[Route("/api/event", name: "event_main")]
 class EventController extends EventrController
 {
-    #[Route('create')]
-    public function testApi()
+    #[Route('/types', name: 'api_event_types_list', methods: ["GET"])]
+    public function listEventTypes(EventTypeManager $eventTypeManager): JsonResponse
     {
-        $eventType = new EventType();
-        $eventType->setSlug('test');
-        $eventType->setDescription('test');
-        $eventType->setId(1);
+        return $this->makeSerializedResponse(
+            [
+                'event_types' => $eventTypeManager->getEventTypes()
+            ]
+        );
+    }
 
         $event = new Event();
         $event->setEventType($eventType);
