@@ -5,8 +5,8 @@ namespace App\Entity;
 use App\Repository\EventRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use JMS\Serializer\Annotation as Serializer;
-use Symfony\Component\Security\Core\User\UserInterface;
+use Gedmo\Mapping\Annotation\Timestampable;
+
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
 class Event
@@ -16,19 +16,19 @@ class Event
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'events')]
+    #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?EventType $event_type = null;
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false, unique: false)]
+    private EventType $event_type;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $event_date = null;
+    private \DateTimeInterface $event_date;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $rsvp_date = null;
+    private \DateTimeInterface $rsvp_date;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Timestampable(on: 'create')]
@@ -110,7 +110,7 @@ class Event
         return $this;
     }
 
-    public function getEventType(): ?EventType
+    public function getEventType(): EventType
     {
         return $this->event_type;
     }
