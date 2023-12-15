@@ -5,8 +5,10 @@ namespace App\Controller\Events;
 use App\Controller\EventrController;
 use App\Entity\Event;
 use App\Entity\EventType;
+use App\Entity\Status;
 use App\Manager\EventManager;
 use App\Manager\EventTypeManager;
+use App\Manager\StatusManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,7 +28,12 @@ class EventController extends EventrController
     }
 
     #[Route('', name: "api_event_create_post", methods: ["POST"])]
-    public function testApi(EventTypeManager $eventTypeManager, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function testApi(
+        EventTypeManager $eventTypeManager,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        StatusManager $statusManager
+    ): JsonResponse
     {
         if (!$request->get('event_type_id')) {
             throw new \Exception('Event type ID must be supplied');
@@ -51,6 +58,9 @@ class EventController extends EventrController
         $event->setEventDate(new \DateTime($request->get('event_date')));
         $event->setUser($this->getUser());
         $event->setRsvpDate(new \DateTime($request->get('rsvp_date')));
+        $event->setStatus(
+            $statusManager->getStatus(Status::PRIVATE)
+        );
 
         $entityManager->persist($event);
         $entityManager->flush();
@@ -77,9 +87,44 @@ class EventController extends EventrController
     {
         return $this->makeSerializedResponse(
             [
-                'event' => $eventManager->getEvent($eventId)
+                'event' => $eventManager->getEvent(
+                    $eventId,
+                    $this->getUser()
+                )
             ]
         );
+    }
+
+    #[Route("/{eventId}/cancel", name: 'api_event_put', methods: ["DELETE"])]
+    public function cancelEvent(
+        int $eventId,
+        EventManager $eventManager,
+        StatusManager $statusManager,
+        EntityManagerInterface $entityManager
+    )
+    {
+        $event = $eventManager->getEvent(
+            $eventId,
+            $this->getUser()
+        );
+
+        if (!$event instanceof Event) {
+            throw new \Exception('Event not found');
+        }
+
+        if ($event->getStatus()->getId() === Status::CANCELLED) {
+            throw new \Exception('Event already cancelled');
+        }
+
+        $event->setStatus(
+            $statusManager->getStatus(Status::CANCELLED)
+        );
+
+        $entityManager->flush();
+
+        return $this->makeSerializedResponse([
+            'event' => $event
+        ]);
     }
 
 
