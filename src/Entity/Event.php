@@ -24,6 +24,11 @@ class Event
     #[ORM\JoinColumn(nullable: false, unique: false)]
     private EventType $event_type;
 
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false, unique: false)]
+    private Status $status;
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private \DateTimeInterface $event_date;
 
@@ -113,6 +118,16 @@ class Event
     public function getEventType(): EventType
     {
         return $this->event_type;
+    }
+
+    public function getStatus(): Status
+    {
+        return $this->status;
+    }
+
+    public function setStatus(Status $status): void
+    {
+        $this->status = $status;
     }
 
     public function setEventType(EventType $event_type): static
