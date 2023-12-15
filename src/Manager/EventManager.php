@@ -15,9 +15,12 @@ class EventManager
         $this->eventRepository = $eventRepository;
     }
 
-    public function getEvent(int $id): ?Event
+    public function getEvent(int $id, UserInterface $user): ?Event
     {
-        return $this->getEventRepository()->find($id);
+        return $this->getEventRepository()->findOneBy([
+            'id' => $id,
+            'user' => $user
+        ]);
     }
 
     private function getEventRepository(): EventRepository
