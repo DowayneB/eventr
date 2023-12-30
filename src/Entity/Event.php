@@ -6,6 +6,7 @@ use App\Repository\EventRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation\Timestampable;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
@@ -16,9 +17,9 @@ class Event
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?User $user = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_id',nullable: false)]
+    private ?UserInterface $user = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, unique: false)]
@@ -103,12 +104,12 @@ class Event
         return $this;
     }
 
-    public function getUser(): ?User
+    public function getUser(): ?UserInterface
     {
         return $this->user;
     }
 
-    public function setUser(User $user): static
+    public function setUser(UserInterface $user): static
     {
         $this->user = $user;
 
