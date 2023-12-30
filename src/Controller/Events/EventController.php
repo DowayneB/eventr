@@ -127,5 +127,78 @@ class EventController extends EventrController
         ]);
     }
 
+    #[Route(
+        "/{eventId}/make-public",
+        methods: ["PUT"]
+    )]
+    public function makeEventPublic(
+        int $eventId,
+        EventManager $eventManager,
+        StatusManager $statusManager,
+        EntityManagerInterface $entityManager
+    ): JsonResponse
+    {
+        $event = $eventManager->getEvent(
+            $eventId,
+            $this->getUser()
+        );
+
+        if (!$event instanceof Event)
+        {
+            throw new \Exception('Unable to find event');
+        }
+
+        if ($event->getStatus()->getId() === Status::ACTIVE)
+        {
+            throw new \Exception('Event is already public');
+        }
+
+        $event->setStatus($statusManager->getStatus(
+            Status::ACTIVE
+        ));
+
+        $entityManager->flush();
+
+        return $this->makeSerializedResponse([
+            'event' => $event
+        ]);
+    }
+
+    #[Route(
+        "/{eventId}/make-private",
+        methods: ["PUT"]
+    )]
+    public function makeEventPrivate(
+        int $eventId,
+        EventManager $eventManager,
+        StatusManager $statusManager,
+        EntityManagerInterface $entityManager
+    ): JsonResponse
+    {
+        $event = $eventManager->getEvent(
+            $eventId,
+            $this->getUser()
+        );
+
+        if (!$event instanceof Event)
+        {
+            throw new \Exception('Unable to find event');
+        }
+
+        if ($event->getStatus()->getId() === Status::PRIVATE)
+        {
+            throw new \Exception('Event is already private');
+        }
+
+        $event->setStatus($statusManager->getStatus(
+            Status::PRIVATE
+        ));
+
+        $entityManager->flush();
+
+        return $this->makeSerializedResponse([
+            'event' => $event
+        ]);
+    }
 
 }
