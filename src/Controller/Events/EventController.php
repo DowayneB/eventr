@@ -14,11 +14,20 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route("/api/event", name: "event_main")]
+#[Route(
+    "/api/event",
+    name: "event_main"
+)]
 class EventController extends EventrController
 {
-    #[Route('/types', name: 'api_event_types_list', methods: ["GET"])]
-    public function listEventTypes(EventTypeManager $eventTypeManager): JsonResponse
+    #[Route(
+        '/types',
+        name: 'api_event_types_list',
+        methods: ["GET"]
+    )]
+    public function listEventTypes(
+        EventTypeManager $eventTypeManager
+    ): JsonResponse
     {
         return $this->makeSerializedResponse(
             [
@@ -27,7 +36,11 @@ class EventController extends EventrController
         );
     }
 
-    #[Route('', name: "api_event_create_post", methods: ["POST"])]
+    #[Route(
+        null,
+        name: "api_event_create_post",
+        methods: ["POST"]
+    )]
     public function testApi(
         EventTypeManager $eventTypeManager,
         Request $request,
@@ -72,8 +85,14 @@ class EventController extends EventrController
         );
     }
 
-    #[Route("/my-events", name: 'api_event_list_get', methods: ["GET"])]
-    public function listEvents(EventManager $eventManager): JsonResponse
+    #[Route(
+        "/my-events",
+        name: 'api_event_list_get',
+        methods: ["GET"]
+    )]
+    public function listEvents(
+        EventManager $eventManager
+    ): JsonResponse
     {
         return $this->makeSerializedResponse(
             [
@@ -82,8 +101,15 @@ class EventController extends EventrController
         );
     }
 
-    #[Route("/{eventId}", name: 'api_event_get', methods: ["GET"])]
-    public function getEvent(int $eventId, EventManager $eventManager): JsonResponse
+    #[Route(
+        "/{eventId}",
+        name: 'api_event_get',
+        methods: ["GET"]
+    )]
+    public function getEvent(
+        int $eventId,
+        EventManager $eventManager
+    ): JsonResponse
     {
         return $this->makeSerializedResponse(
             [
@@ -95,13 +121,17 @@ class EventController extends EventrController
         );
     }
 
-    #[Route("/{eventId}/cancel", name: 'api_event_put', methods: ["DELETE"])]
+    #[Route(
+        "/{eventId}/cancel",
+        name: 'api_event_put',
+        methods: ["DELETE"]
+    )]
     public function cancelEvent(
         int $eventId,
         EventManager $eventManager,
         StatusManager $statusManager,
         EntityManagerInterface $entityManager
-    )
+    ): JsonResponse
     {
         $event = $eventManager->getEvent(
             $eventId,
