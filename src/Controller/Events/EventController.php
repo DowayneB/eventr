@@ -178,14 +178,12 @@ class EventController extends EventrController
             throw new \Exception('Unable to find event');
         }
 
-        if ($event->getStatus()->getId() === Status::ACTIVE)
+        if (!$event->isPrivate())
         {
             throw new \Exception('Event is already public');
         }
 
-        $event->setStatus($statusManager->getStatus(
-            Status::ACTIVE
-        ));
+        $event->setPrivate(false);
 
         $entityManager->flush();
 
@@ -215,14 +213,12 @@ class EventController extends EventrController
             throw new \Exception('Unable to find event');
         }
 
-        if ($event->getStatus()->getId() === Status::PRIVATE)
+        if ($event->isPrivate())
         {
             throw new \Exception('Event is already private');
         }
 
-        $event->setStatus($statusManager->getStatus(
-            Status::PRIVATE
-        ));
+        $event->setPrivate(true);
 
         $entityManager->flush();
 

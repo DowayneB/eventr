@@ -30,6 +30,9 @@ class Event
     #[ORM\JoinColumn(nullable: false, unique: false)]
     private Status $status;
 
+    #[ORM\Column(type: Types::BOOLEAN)]
+    private bool $private;
+
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private \DateTimeInterface $event_date;
 
@@ -129,6 +132,16 @@ class Event
     public function setStatus(Status $status): void
     {
         $this->status = $status;
+    }
+
+    public function isPrivate(): bool
+    {
+        return $this->private;
+    }
+
+    public function setPrivate(bool $private): void
+    {
+        $this->private = $private;
     }
 
     public function setEventType(EventType $event_type): static
