@@ -6,10 +6,15 @@ use App\Controller\EventrController;
 use App\Entity\Event;
 use App\Entity\EventType;
 use App\Entity\Status;
+use App\Exception\ActionProhibitedException;
+use App\Exception\NotFoundException;
+use App\Helper\ExceptionHelper;
 use App\Manager\EventManager;
 use App\Manager\EventTypeManager;
 use App\Manager\StatusManager;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
@@ -36,6 +41,9 @@ class EventController extends EventrController
         );
     }
 
+    /**
+     * @throws Exception
+     */
     #[Route(
         null,
         name: "api_event_create_post",
@@ -119,6 +127,10 @@ class EventController extends EventrController
         );
     }
 
+    /**
+     * @throws NotFoundException
+     * @throws ActionProhibitedException
+     */
     #[Route(
         "/{eventId}/cancel",
         name: 'api_event_put',
@@ -137,11 +149,11 @@ class EventController extends EventrController
         );
 
         if (!$event instanceof Event) {
-            throw new \Exception('Event not found');
+            throw ExceptionHelper::eventNotFoundException();
         }
 
         if ($event->getStatus()->getId() === Status::CANCELLED) {
-            throw new \Exception('Event already cancelled');
+            throw ExceptionHelper::alreadyActionedException();
         }
 
         $event->setStatus(
@@ -155,6 +167,10 @@ class EventController extends EventrController
         ]);
     }
 
+    /**
+     * @throws ActionProhibitedException
+     * @throws NotFoundException
+     */
     #[Route(
         "/{eventId}/make-public",
         methods: ["PUT"]
@@ -162,7 +178,6 @@ class EventController extends EventrController
     public function makeEventPublic(
         int $eventId,
         EventManager $eventManager,
-        StatusManager $statusManager,
         EntityManagerInterface $entityManager
     ): JsonResponse
     {
@@ -173,12 +188,12 @@ class EventController extends EventrController
 
         if (!$event instanceof Event)
         {
-            throw new \Exception('Unable to find event');
+            throw ExceptionHelper::eventNotFoundException();
         }
 
         if (!$event->isPrivate())
         {
-            throw new \Exception('Event is already public');
+            throw ExceptionHelper::alreadyActionedException();
         }
 
         $event->setPrivate(false);
@@ -190,6 +205,10 @@ class EventController extends EventrController
         ]);
     }
 
+    /**
+     * @throws NotFoundException
+     * @throws ActionProhibitedException
+     */
     #[Route(
         "/{eventId}/make-private",
         methods: ["PUT"]
@@ -197,7 +216,6 @@ class EventController extends EventrController
     public function makeEventPrivate(
         int $eventId,
         EventManager $eventManager,
-        StatusManager $statusManager,
         EntityManagerInterface $entityManager
     ): JsonResponse
     {
@@ -208,12 +226,12 @@ class EventController extends EventrController
 
         if (!$event instanceof Event)
         {
-            throw new \Exception('Unable to find event');
+            throw ExceptionHelper::eventNotFoundException();
         }
 
         if ($event->isPrivate())
         {
-            throw new \Exception('Event is already private');
+            throw ExceptionHelper::alreadyActionedException();
         }
 
         $event->setPrivate(true);
