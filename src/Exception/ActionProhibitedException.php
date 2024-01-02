@@ -2,7 +2,7 @@
 
 namespace App\Exception;
 
-class ActionProhibitedException
+class ActionProhibitedException extends \Exception
 {
 
 }
