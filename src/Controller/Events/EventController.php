@@ -45,34 +45,32 @@ class EventController extends EventrController
         EventTypeManager $eventTypeManager,
         Request $request,
         EntityManagerInterface $entityManager,
-        StatusManager $statusManager
+        EventManager $eventManager
     ): JsonResponse
     {
         if (!$request->get('event_type_id')) {
-            throw new \Exception('Event type ID must be supplied');
+            throw new Exception('Event type ID must be supplied');
         }
 
         $eventType = $eventTypeManager->getEventType($request->get('event_type_id'));
 
         if (!$eventType instanceof EventType) {
-            throw new \Exception("No event type found with given ID");
+            throw new Exception("No event type found with given ID");
         }
 
         if (!$request->get('event_date')) {
-            throw new \Exception("Event date must be supplied");
+            throw new Exception("Event date must be supplied");
         }
 
         if (!$request->get('rsvp_date')) {
-            throw new \Exception("RSVP date must be supplied");
+            throw new Exception("RSVP date must be supplied");
         }
 
-        $event = new Event();
-        $event->setEventType($eventType);
-        $event->setEventDate(new \DateTime($request->get('event_date')));
-        $event->setUser($this->getUser());
-        $event->setRsvpDate(new \DateTime($request->get('rsvp_date')));
-        $event->setStatus(
-            $statusManager->getStatus(Status::PRIVATE)
+        $event = $eventManager->createEvent(
+            $eventType,
+            new DateTime($request->get('event_date')),
+            new DateTime($request->get('rsvp_date')),
+            $this->getUser()
         );
 
         $entityManager->persist($event);
