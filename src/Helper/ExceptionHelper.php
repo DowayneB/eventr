@@ -6,7 +6,7 @@ use App\Exception\ActionProhibitedException;
 use App\Exception\NotFoundException;
 use App\Exception\ValidationException;
 
-final class ExceptionHelper
+abstract class ExceptionHelper
 {
     public static function eventNotFoundException(): NotFoundException
     {
