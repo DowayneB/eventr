@@ -57,7 +57,7 @@ class EventController extends EventrController
     ): JsonResponse
     {
         if (!$request->get('event_type_id')) {
-            throw new Exception('Event type ID must be supplied');
+            throw ExceptionHelper::validationFieldRequiredException("event_type_id");
         }
 
         $eventType = $eventTypeManager->getEventType($request->get('event_type_id'));
@@ -67,17 +67,34 @@ class EventController extends EventrController
         }
 
         if (!$request->get('event_date')) {
-            throw new Exception("Event date must be supplied");
+            throw ExceptionHelper::validationFieldRequiredException("event_date");
         }
 
         if (!$request->get('rsvp_date')) {
-            throw new Exception("RSVP date must be supplied");
+            throw ExceptionHelper::validationFieldRequiredException("rsvp_date");
+        }
+
+        $eventDate = new DateTime($request->get('event_date'));
+        $rsvpDate = new DateTime($request->get('rsvp_date'));
+
+        if ($eventDate > new DateTime('-2 day'))
+        {
+            throw ExceptionHelper::validationFieldIncorrectException(
+                "Events must be created at least 3 days before the event takes place"
+            );
+        }
+
+        if ($rsvpDate >= (new DateTime())->setTimestamp($eventDate->getTimestamp())->modify('-1 day'))
+        {
+            throw ExceptionHelper::validationFieldIncorrectException(
+                "RSVP date must be at least 1 day before the event takes place"
+            );
         }
 
         $event = $eventManager->createEvent(
             $eventType,
-            new DateTime($request->get('event_date')),
-            new DateTime($request->get('rsvp_date')),
+            $eventDate,
+            $rsvpDate,
             $this->getUser()
         );
 
