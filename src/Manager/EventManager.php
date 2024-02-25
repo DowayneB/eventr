@@ -71,4 +71,12 @@ class EventManager
     {
         return $this->statusManager;
     }
+
+    /**
+     * @return Event[]
+     */
+    public function findIncompleteEvents(): array
+    {
+        return $this->getEventRepository()->findIncompleteEvents();
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Event;
+use App\Entity\Status;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -45,4 +46,16 @@ class EventRepository extends ServiceEntityRepository
 //            ->getOneOrNullResult()
 //        ;
 //    }
+
+
+    /**
+     * @return Event[]
+     */
+    public function findIncompleteEvents(): array
+    {
+        return $this->createQueryBuilder('e')
+            ->where('e.status not in (:statuses)')
+            ->setParameter('statuses',[Status::COMPLETE,Status::CANCELLED])
+            ->getQuery()->getResult();
+    }
 }
