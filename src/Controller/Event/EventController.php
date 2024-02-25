@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Events;
+namespace App\Controller\Event;
 
 use App\Controller\EventrController;
 use App\Entity\Event;
@@ -124,7 +124,7 @@ class EventController extends EventrController
     }
 
     #[Route(
-        "/my-events",
+        "/",
         name: 'api_event_list_get',
         methods: ["GET"]
     )]
