@@ -42,9 +42,6 @@ class EventController extends EventrController
         );
     }
 
-    /**
-     * @throws Exception
-     */
     #[Route(
         null,
         name: "api_event_create_post",
