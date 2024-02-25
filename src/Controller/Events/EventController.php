@@ -77,7 +77,7 @@ class EventController extends EventrController
         $eventDate = new DateTime($request->get('event_date'));
         $rsvpDate = new DateTime($request->get('rsvp_date'));
 
-        if ($eventDate > new DateTime('-2 day'))
+        if (DateTimeImmutable::createFromMutable($eventDate)->modify('- 3 day') < new DateTime())
         {
             throw ExceptionHelper::validationFieldIncorrectException(
                 "Events must be created at least 3 days before the event takes place"
