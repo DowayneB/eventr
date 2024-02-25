@@ -2,17 +2,14 @@
 
 namespace App\Controller;
 
-use App\Entity\Event;
-use App\Entity\EventType;
-use JMS\Serializer\SerializerBuilder;
+use App\Controller\EventType\JsonRequest;
 use JMS\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
 
 class EventrController extends AbstractController
 {
+    use JsonRequest;
     protected SerializerInterface $serializer;
     public function __construct(
         SerializerInterface $serializer,

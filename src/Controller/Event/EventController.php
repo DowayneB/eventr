@@ -48,55 +48,52 @@ class EventController extends EventrController
         methods: ["POST"]
     )]
     public function testApi(
-        EventTypeManager $eventTypeManager,
-        Request $request,
+        EventTypeManager       $eventTypeManager,
+        Request                $request,
         EntityManagerInterface $entityManager,
-        EventManager $eventManager
+        EventManager           $eventManager
     ): JsonResponse
     {
-        if (!$request->get('event_type_id')) {
+        if (!$this->get($request, 'event_type_id')) {
             throw ExceptionHelper::validationFieldRequiredException("event_type_id");
         }
 
-        $eventType = $eventTypeManager->getEventType($request->get('event_type_id'));
+        $eventType = $eventTypeManager->getEventType($this->get($request, 'event_type_id'));
 
         if (!$eventType instanceof EventType) {
             throw new Exception("No event type found with given ID");
         }
 
-        if (!$request->get('event_date')) {
+        if (!$this->get($request, 'event_date')) {
             throw ExceptionHelper::validationFieldRequiredException("event_date");
         }
 
-        if (!$request->get('rsvp_date')) {
+        if (!$this->get($request, 'rsvp_date')) {
             throw ExceptionHelper::validationFieldRequiredException("rsvp_date");
         }
 
-        $eventDate = new DateTime($request->get('event_date'));
-        $rsvpDate = new DateTime($request->get('rsvp_date'));
+        $eventDate = new DateTime($this->get($request, 'event_date'));
+        $rsvpDate = new DateTime($this->get($request, 'rsvp_date'));
 
-        if (DateTimeImmutable::createFromMutable($eventDate)->modify('- 3 day') < new DateTime())
-        {
+        if (DateTimeImmutable::createFromMutable($eventDate)->modify('- 3 day') < new DateTime()) {
             throw ExceptionHelper::validationFieldIncorrectException(
                 "Events must be created at least 3 days before the event takes place"
             );
         }
 
-        if ($rsvpDate >= (new DateTime())->setTimestamp($eventDate->getTimestamp())->modify('-1 day'))
-        {
+        if ($rsvpDate >= (new DateTime())->setTimestamp($eventDate->getTimestamp())->modify('-1 day')) {
             throw ExceptionHelper::validationFieldIncorrectException(
                 "RSVP date must be at least 1 day before the event takes place"
             );
         }
 
-        if ($rsvpDate <= new \DateTime('now'))
-        {
+        if ($rsvpDate <= new \DateTime('now')) {
             throw ExceptionHelper::validationFieldIncorrectException(
                 "RSVP date cannot be in the past"
             );
         }
 
-        if (!$request->get('description')) {
+        if (!$this->get($request, 'description')) {
             throw ExceptionHelper::validationFieldRequiredException(
                 'Description'
             );
@@ -104,7 +101,7 @@ class EventController extends EventrController
 
         $event = $eventManager->createEvent(
             $eventType,
-            $request->get('description'),
+            $this->get($request, 'description'),
             $eventDate,
             $rsvpDate,
             $this->getUser()
@@ -142,7 +139,7 @@ class EventController extends EventrController
         methods: ["GET"]
     )]
     public function getEvent(
-        int $eventId,
+        int          $eventId,
         EventManager $eventManager
     ): JsonResponse
     {
@@ -166,9 +163,9 @@ class EventController extends EventrController
         methods: ["DELETE"]
     )]
     public function cancelEvent(
-        int $eventId,
-        EventManager $eventManager,
-        StatusManager $statusManager,
+        int                    $eventId,
+        EventManager           $eventManager,
+        StatusManager          $statusManager,
         EntityManagerInterface $entityManager
     ): JsonResponse
     {
@@ -205,8 +202,8 @@ class EventController extends EventrController
         methods: ["PUT"]
     )]
     public function makeEventPublic(
-        int $eventId,
-        EventManager $eventManager,
+        int                    $eventId,
+        EventManager           $eventManager,
         EntityManagerInterface $entityManager
     ): JsonResponse
     {
@@ -215,13 +212,11 @@ class EventController extends EventrController
             $this->getUser()
         );
 
-        if (!$event instanceof Event)
-        {
+        if (!$event instanceof Event) {
             throw ExceptionHelper::eventNotFoundException();
         }
 
-        if (!$event->isPrivate())
-        {
+        if (!$event->isPrivate()) {
             throw ExceptionHelper::alreadyActionedException();
         }
 
@@ -243,8 +238,8 @@ class EventController extends EventrController
         methods: ["PUT"]
     )]
     public function makeEventPrivate(
-        int $eventId,
-        EventManager $eventManager,
+        int                    $eventId,
+        EventManager           $eventManager,
         EntityManagerInterface $entityManager
     ): JsonResponse
     {
@@ -253,13 +248,11 @@ class EventController extends EventrController
             $this->getUser()
         );
 
-        if (!$event instanceof Event)
-        {
+        if (!$event instanceof Event) {
             throw ExceptionHelper::eventNotFoundException();
         }
 
-        if ($event->isPrivate())
-        {
+        if ($event->isPrivate()) {
             throw ExceptionHelper::alreadyActionedException();
         }
 
