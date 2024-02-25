@@ -13,6 +13,7 @@ use App\Manager\EventManager;
 use App\Manager\EventTypeManager;
 use App\Manager\StatusManager;
 use DateTime;
+use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -91,8 +92,22 @@ class EventController extends EventrController
             );
         }
 
+        if ($rsvpDate <= new \DateTime('now'))
+        {
+            throw ExceptionHelper::validationFieldIncorrectException(
+                "RSVP date cannot be in the past"
+            );
+        }
+
+        if (!$request->get('description')) {
+            throw ExceptionHelper::validationFieldRequiredException(
+                'Description'
+            );
+        }
+
         $event = $eventManager->createEvent(
             $eventType,
+            $request->get('description'),
             $eventDate,
             $rsvpDate,
             $this->getUser()

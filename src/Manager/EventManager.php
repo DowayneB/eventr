@@ -47,6 +47,7 @@ class EventManager
 
     public function createEvent(
         EventType $eventType,
+        string $eventDescription,
         \DateTime $eventDate,
         \DateTime $rsvpDate,
         UserInterface $user
@@ -54,6 +55,7 @@ class EventManager
     {
         $event = new Event();
         $event->setEventType($eventType);
+        $event->setDescription($eventDescription);
         $event->setEventDate($eventDate);
         $event->setUser($user);
         $event->setRsvpDate($rsvpDate);

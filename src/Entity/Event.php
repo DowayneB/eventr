@@ -18,13 +18,15 @@ class Event
     private ?int $id = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: 'user_id',nullable: false)]
+    #[ORM\JoinColumn(name: 'user_id', nullable: false)]
     private ?UserInterface $user = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, unique: false)]
     private EventType $event_type;
 
+    #[ORM\Column(type: Types::STRING)]
+    private string $description;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, unique: false)]
@@ -122,6 +124,16 @@ class Event
     public function getEventType(): EventType
     {
         return $this->event_type;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    public function setDescription(string $description): void
+    {
+        $this->description = $description;
     }
 
     public function getStatus(): Status
