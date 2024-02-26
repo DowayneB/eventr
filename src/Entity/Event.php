@@ -17,9 +17,6 @@ class Event
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: 'user_id', nullable: false)]
-    private ?UserInterface $user = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, unique: false)]
@@ -40,6 +37,10 @@ class Event
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private \DateTimeInterface $rsvp_date;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_id', nullable: false)]
+    private UserInterface $user;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Timestampable(on: 'create')]

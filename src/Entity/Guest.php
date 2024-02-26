@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\GuestRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation\Timestampable;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: GuestRepository::class)]
@@ -26,16 +27,22 @@ class Guest
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', nullable: false)]
-    private ?UserInterface $user = null;
+    private UserInterface $user;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'guest_user_id', nullable: true)]
+    private ?UserInterface $guestUser = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $email_address = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $created_at = null;
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Timestampable(on: 'create')]
+    private \DateTimeInterface $created_at;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private ?\DateTimeInterface $updated_at = null;
+    #[Timestampable(on: 'update')]
+    private \DateTimeInterface $updated_at;
 
     public function getId(): ?int
     {
@@ -69,6 +76,16 @@ class Guest
     public function setUser(?UserInterface $user): void
     {
         $this->user = $user;
+    }
+
+    public function getGuestUser(): ?UserInterface
+    {
+        return $this->guestUser;
+    }
+
+    public function setGuestUser(?UserInterface $guestUser): void
+    {
+        $this->guestUser = $guestUser;
     }
 
     public function getCellNumber(): ?string
