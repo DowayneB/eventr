@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\EventType;
+namespace App\Helper;
 
 use Symfony\Component\HttpFoundation\Request;
 
