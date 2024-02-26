@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Controller\EventType\JsonRequest;
+use App\Helper\JsonRequest;
 use JMS\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
