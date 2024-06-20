@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\EventRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation\Timestampable;
@@ -49,6 +51,14 @@ class Event
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Timestampable(on: 'update')]
     private \DateTimeInterface $updated_at;
+
+    #[ORM\OneToMany(mappedBy: 'event_id', targetEntity: Invitation::class)]
+    private Collection $invitations;
+
+    public function __construct()
+    {
+        $this->invitations = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -160,6 +170,36 @@ class Event
     public function setEventType(EventType $event_type): static
     {
         $this->event_type = $event_type;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Invitation>
+     */
+    public function getInvitations(): Collection
+    {
+        return $this->invitations;
+    }
+
+    public function addInvitation(Invitation $invitation): static
+    {
+        if (!$this->invitations->contains($invitation)) {
+            $this->invitations->add($invitation);
+            $invitation->setEventId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeInvitation(Invitation $invitation): static
+    {
+        if ($this->invitations->removeElement($invitation)) {
+            // set the owning side to null (unless already changed)
+            if ($invitation->getEventId() === $this) {
+                $invitation->setEventId(null);
+            }
+        }
 
         return $this;
     }
