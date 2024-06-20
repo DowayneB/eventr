@@ -8,7 +8,6 @@ use App\Helper\ExceptionHelper;
 use App\Helper\JsonRequest;
 use App\Helper\ValidationHelper;
 use App\Manager\GuestManager;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\OptimisticLockException;

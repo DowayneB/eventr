@@ -128,7 +128,7 @@ class EventController extends EventrController
     {
         return $this->makeSerializedResponse(
             [
-                'event' => $eventManager->getEventsByUser($this->getUser())
+                'event' => $eventManager->getActiveEventsByUser($this->getUser())
             ]
         );
     }

@@ -38,11 +38,16 @@ class EventManager
     /**
      * @return Event[]
      */
-    public function getEventsByUser(UserInterface $user): array
+    public function getActiveEventsByUser(UserInterface $user): array
     {
-        return $this->getEventRepository()->findBy([
-            'user' => $user
-        ]);
+        return $this->getEventRepository()->createQueryBuilder('e')
+            ->where('e.user = :user')
+            ->andWhere('e.status != :cancelled')
+            ->setParameters([
+                'user' => $user,
+                'cancelled' => Status::CANCELLED
+            ])->getQuery()->getResult();
+
     }
 
     public function createEvent(
