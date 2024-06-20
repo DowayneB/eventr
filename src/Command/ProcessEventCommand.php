@@ -47,12 +47,26 @@ class ProcessEventCommand extends Command
             switch ($event->getStatus()->getId())
             {
                 case Status::STARTED:
-                    // send RSVP emails
+                    $this->sendRSVPNotifications($event);
+                    // send invitations to guests, via SMS or email
+                    // if guest_id is user_id it would allow for users to manage all events they're invited to
+                    // might also be good to help suppliers keep tabs on guest list, and make preparations for dietry requirements
+                    // but they also might not have users, so maybe create a user with status GUEST_ONLY until they sign up
+                    // send reminders once a week if not RSVP'd and not notifications stopped
+                    // send reminder 1 week and 1 day before event for RSVP'd users
                     break;
                 case Status::RSVP_CLOSED:
-                    // send RSVP closed emails, and alert event owner
+                    $this->sendRsvpClosedNotifications($event);
+                    // send RSVP closed emails, and alert event owner that RSVP is closd, and stats on who has RSVP'd
                     break;
                 case Status::IN_PROGRESS:
+                    $this->sendInProgressNotification($event);
+                    // if the event is in progress, send an optional notification. i.e. "the floor on the east side of the building is slippery due to rain etc."
+                    // this is sent only once per guest
+                case Status::CANCELLED:
+                    $this->sendCancellationNotification($event);
+                    // send notifications that event has been cancelled.
+                    // good opportunity to make a notifications table to not spam people.
                     break;
             }
         }
