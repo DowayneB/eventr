@@ -5,16 +5,20 @@ namespace App\Controller\Event;
 use App\Controller\EventrController;
 use App\Entity\Event;
 use App\Entity\EventType;
+use App\Entity\Guest;
 use App\Entity\Status;
 use App\Exception\ActionProhibitedException;
 use App\Exception\NotFoundException;
 use App\Helper\ExceptionHelper;
 use App\Manager\EventManager;
 use App\Manager\EventTypeManager;
+use App\Manager\GuestManager;
 use App\Manager\StatusManager;
 use DateTime;
 use DateTimeImmutable;
+use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\Persistence\ObjectManager;
 use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -259,6 +263,27 @@ class EventController extends EventrController
         $event->setPrivate(true);
 
         $entityManager->flush();
+
+        return $this->makeSerializedResponse([
+            'event' => $event
+        ]);
+    }
+
+    #[Route(
+        "/{event}/invite/{guest}",
+        methods: ["POST"]
+    )]
+    public function inviteGuest(
+        Event $event,
+        Guest $guest,
+        EntityManagerInterface $objectManager
+    ): JsonResponse
+    {
+        $event->addGuest($guest);
+        $objectManager->persist($event);
+        $objectManager->flush();
+
+        //send invitation
 
         return $this->makeSerializedResponse([
             'event' => $event

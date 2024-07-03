@@ -52,12 +52,15 @@ class Event
     #[Timestampable(on: 'update')]
     private \DateTimeInterface $updated_at;
 
-    #[ORM\OneToMany(mappedBy: 'event_id', targetEntity: Invitation::class)]
-    private Collection $invitations;
+    #[ORM\ManyToMany(targetEntity: Guest::class, mappedBy: 'events')]
+    private Collection $guests;
+
+    #[ORM\OneToOne(mappedBy: 'event_id', cascade: ['persist', 'remove'])]
+    private ?Invitation $invitation = null;
 
     public function __construct()
     {
-        $this->invitations = new ArrayCollection();
+        $this->guests = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -175,31 +178,45 @@ class Event
     }
 
     /**
-     * @return Collection<int, Invitation>
+     * @return Collection<int, Guest>
      */
-    public function getInvitations(): Collection
+    public function getGuests(): Collection
     {
-        return $this->invitations;
+        return $this->guests;
     }
 
-    public function addInvitation(Invitation $invitation): static
+    public function addGuest(Guest $guest): static
     {
-        if (!$this->invitations->contains($invitation)) {
-            $this->invitations->add($invitation);
-            $invitation->setEventId($this);
+        if (!$this->guests->contains($guest)) {
+            $this->guests->add($guest);
+            $guest->addEvent($this);
         }
 
         return $this;
     }
 
-    public function removeInvitation(Invitation $invitation): static
+    public function removeGuest(Guest $guest): static
     {
-        if ($this->invitations->removeElement($invitation)) {
-            // set the owning side to null (unless already changed)
-            if ($invitation->getEventId() === $this) {
-                $invitation->setEventId(null);
-            }
+        if ($this->guests->removeElement($guest)) {
+            $guest->removeEvent($this);
         }
+
+        return $this;
+    }
+
+    public function getInvitation(): ?Invitation
+    {
+        return $this->invitation;
+    }
+
+    public function setInvitation(Invitation $invitation): static
+    {
+        // set the owning side of the relation if necessary
+        if ($invitation->getEventId() !== $this) {
+            $invitation->setEventId($this);
+        }
+
+        $this->invitation = $invitation;
 
         return $this;
     }
