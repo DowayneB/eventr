@@ -10,9 +10,10 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route(
     "/api/event-type",
     name: "event_type_main"
-)]class EventTypeController extends EventrController
+)]
+class EventTypeController extends EventrController
 {
-    #[Route('/', name: 'app_event_type')]
+    #[Route('', name: 'app_event_type')]
     public function index(EventTypeManager $eventTypeManager): Response
     {
         return $this->makeSerializedResponse([

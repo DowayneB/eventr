@@ -23,7 +23,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 {
     use JsonRequest;
 
-    #[Route('/', name: 'app_guest_list', methods: ["GET"])]
+    #[Route('', name: 'app_guest_list', methods: ["GET"])]
     public function listGuests(GuestManager $guestManager, UserInterface $user): Response
     {
         return $this->makeSerializedResponse([
@@ -36,7 +36,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
      * @throws OptimisticLockException
      * @throws ValidationException
      */
-    #[Route('/', name: 'app_guest_create', methods: ["POST"])]
+    #[Route('', name: 'app_guest_create', methods: ["POST"])]
     public function createGuest(
         GuestManager $guestManager,
         UserInterface $user,
