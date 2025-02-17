@@ -37,12 +37,12 @@ class Invitation
 
     public function getEventId(): ?Event
     {
-        return $this->event_id;
+        return $this->event;
     }
 
-    public function setEventId(Event $event_id): static
+    public function setEventId(Event $event): static
     {
-        $this->event_id = $event_id;
+        $this->event = $event;
 
         return $this;
     }
