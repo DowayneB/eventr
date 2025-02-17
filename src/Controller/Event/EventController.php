@@ -31,22 +31,6 @@ use Symfony\Component\Routing\Annotation\Route;
 class EventController extends EventrController
 {
     #[Route(
-        '/types',
-        name: 'api_event_types_list',
-        methods: ["GET"]
-    )]
-    public function listEventTypes(
-        EventTypeManager $eventTypeManager
-    ): JsonResponse
-    {
-        return $this->makeSerializedResponse(
-            [
-                'event_types' => $eventTypeManager->getEventTypes()
-            ]
-        );
-    }
-
-    #[Route(
         null,
         name: "api_event_create_post",
         methods: ["POST"]
@@ -106,9 +90,11 @@ class EventController extends EventrController
         $event = $eventManager->createEvent(
             $eventType,
             $this->get($request, 'description'),
+            $this->get($request, 'summary'),
             $eventDate,
             $rsvpDate,
-            $this->getUser()
+            $this->getUser(),
+            $this->get($request, 'private')
         );
 
         $entityManager->persist($event);
@@ -122,7 +108,7 @@ class EventController extends EventrController
     }
 
     #[Route(
-        "/",
+        "",
         name: 'api_event_list_get',
         methods: ["GET"]
     )]
@@ -283,7 +269,7 @@ class EventController extends EventrController
         $objectManager->persist($event);
         $objectManager->flush();
 
-        //send invitation
+        //TODO: Send invitation mail
 
         return $this->makeSerializedResponse([
             'event' => $event
