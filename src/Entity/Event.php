@@ -27,6 +27,9 @@ class Event
     #[ORM\Column(type: Types::STRING)]
     private string $description;
 
+    #[ORM\Column(type: Types::STRING)]
+    private ?string $summary;
+
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, unique: false)]
     private Status $status;
@@ -55,7 +58,7 @@ class Event
     #[ORM\ManyToMany(targetEntity: Guest::class, mappedBy: 'events')]
     private Collection $guests;
 
-    #[ORM\OneToOne(mappedBy: 'event_id', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(mappedBy: 'event', cascade: ['persist', 'remove'])]
     private ?Invitation $invitation = null;
 
     public function __construct()
@@ -148,6 +151,15 @@ class Event
     public function setDescription(string $description): void
     {
         $this->description = $description;
+    }
+
+    public  function getSummary(): ?string
+    {
+        return $this->summary;
+    }
+    public  function setSummary(?string $summary):void
+    {
+        $this->summary = $summary;
     }
 
     public function getStatus(): Status
