@@ -87,4 +87,19 @@ class EventManager
     {
         return $this->getEventRepository()->findIncompleteEvents();
     }
+
+   /**
+    * @return Event[]
+    */
+    public function getPublicEventsForUser(?UserInterface $user): array
+    {
+        return $this->getEventRepository()->createQueryBuilder('e')
+            ->where('e.user != :user')
+            ->andWhere('e.status != :cancelled')
+            ->andWhere('e.private = false')
+            ->setParameters([
+                'user' => $user,
+                'cancelled' => Status::CANCELLED
+            ])->getQuery()->getResult();
+    }
 }

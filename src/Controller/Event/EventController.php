@@ -122,6 +122,21 @@ class EventController extends EventrController
             ]
         );
     }
+    #[Route(
+        "/public",
+        name: 'api_public_event_list_get',
+        methods: ["GET"]
+    )]
+    public function listPublicEvents(
+        EventManager $eventManager
+    ): JsonResponse
+    {
+        return $this->makeSerializedResponse(
+            [
+                'event' => $eventManager->getPublicEventsForUser($this->getUser())
+            ]
+        );
+    }
 
     #[Route(
         "/{eventId}",
