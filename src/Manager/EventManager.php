@@ -53,21 +53,24 @@ class EventManager
     public function createEvent(
         EventType $eventType,
         string $eventDescription,
+        ?string $summary,
         \DateTime $eventDate,
         \DateTime $rsvpDate,
-        UserInterface $user
+        UserInterface $user,
+        bool $private
     ): Event
     {
         $event = new Event();
         $event->setEventType($eventType);
         $event->setDescription($eventDescription);
+        $event->setSummary($summary);
         $event->setEventDate($eventDate);
         $event->setUser($user);
         $event->setRsvpDate($rsvpDate);
         $event->setStatus(
             $this->getStatusManager()->getStatus(Status::ACTIVE)
         );
-        $event->setPrivate(true);
+        $event->setPrivate($private);
 
         return $event;
     }
