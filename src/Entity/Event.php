@@ -61,6 +61,10 @@ class Event
     #[ORM\OneToOne(mappedBy: 'event', cascade: ['persist', 'remove'])]
     private ?Invitation $invitation = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Location $location = null;
+
     public function __construct()
     {
         $this->guests = new ArrayCollection();
@@ -229,6 +233,18 @@ class Event
         }
 
         $this->invitation = $invitation;
+
+        return $this;
+    }
+
+    public function getLocationId(): ?Location
+    {
+        return $this->location;
+    }
+
+    public function setLocationId(?Location $location): static
+    {
+        $this->location = $location;
 
         return $this;
     }
