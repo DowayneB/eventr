@@ -62,7 +62,7 @@ class Event
     private ?Invitation $invitation = null;
 
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?Location $location = null;
 
     public function __construct()
