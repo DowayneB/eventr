@@ -15,13 +15,13 @@ class Location
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?LocationType $location_type = null;
+    private ?LocationType $locationType = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $street_number = null;
+    private ?string $streetNumber = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $street_name = null;
+    private ?string $streetName = null;
 
     #[ORM\Column(length: 255)]
     private ?string $suburb = null;
@@ -42,36 +42,36 @@ class Location
 
     public function getLocationType(): ?LocationType
     {
-        return $this->location_type;
+        return $this->locationType;
     }
 
-    public function setLocationType(?LocationType $location_type): static
+    public function setLocationType(?LocationType $locationType): static
     {
-        $this->location_type = $location_type;
+        $this->locationType = $locationType;
 
         return $this;
     }
 
     public function getStreetNumber(): ?string
     {
-        return $this->street_number;
+        return $this->streetNumber;
     }
 
-    public function setStreetNumber(string $street_number): static
+    public function setStreetNumber(string $streetNumber): static
     {
-        $this->street_number = $street_number;
+        $this->streetNumber = $streetNumber;
 
         return $this;
     }
 
     public function getStreetName(): ?string
     {
-        return $this->street_name;
+        return $this->streetName;
     }
 
-    public function setStreetName(string $street_name): static
+    public function setStreetName(string $streetName): static
     {
-        $this->street_name = $street_name;
+        $this->streetName = $streetName;
 
         return $this;
     }

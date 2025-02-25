@@ -22,10 +22,10 @@ class Guest
     private ?string $name = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $cell_number = null;
+    private ?string $cellNumber = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $birth_date = null;
+    private ?\DateTimeInterface $birthDate = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', nullable: false)]
@@ -36,15 +36,15 @@ class Guest
     private ?UserInterface $guestUser = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $email_address = null;
+    private ?string $emailAddress = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Timestampable(on: 'create')]
-    private \DateTimeInterface $created_at;
+    private \DateTimeInterface $createdAt;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Timestampable(on: 'update')]
-    private \DateTimeInterface $updated_at;
+    private \DateTimeInterface $updatedAt;
 
     #[ORM\ManyToMany(targetEntity: Event::class, inversedBy: 'guests')]
     private Collection $events;
@@ -100,60 +100,60 @@ class Guest
 
     public function getCellNumber(): ?string
     {
-        return $this->cell_number;
+        return $this->cellNumber;
     }
 
-    public function setCellNumber(string $cell_number): static
+    public function setCellNumber(string $cellNumber): static
     {
-        $this->cell_number = $cell_number;
+        $this->cellNumber = $cellNumber;
 
         return $this;
     }
 
     public function getBirthDate(): ?\DateTimeInterface
     {
-        return $this->birth_date;
+        return $this->birthDate;
     }
 
-    public function setBirthDate(?\DateTimeInterface $birth_date): static
+    public function setBirthDate(?\DateTimeInterface $birthDate): static
     {
-        $this->birth_date = $birth_date;
+        $this->birthDate = $birthDate;
 
         return $this;
     }
 
     public function getEmailAddress(): ?string
     {
-        return $this->email_address;
+        return $this->emailAddress;
     }
 
-    public function setEmailAddress(?string $email_address): static
+    public function setEmailAddress(?string $emailAddress): static
     {
-        $this->email_address = $email_address;
+        $this->emailAddress = $emailAddress;
 
         return $this;
     }
 
     public function getCreatedAt(): ?\DateTimeImmutable
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $created_at): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
 
     public function getUpdatedAt(): ?\DateTimeInterface
     {
-        return $this->updated_at;
+        return $this->updatedAt;
     }
 
-    public function setUpdatedAt(\DateTimeInterface $updated_at): static
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): static
     {
-        $this->updated_at = $updated_at;
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }

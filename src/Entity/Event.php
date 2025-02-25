@@ -22,7 +22,7 @@ class Event
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, unique: false)]
-    private EventType $event_type;
+    private EventType $eventType;
 
     #[ORM\Column(type: Types::STRING)]
     private string $description;
@@ -38,10 +38,10 @@ class Event
     private bool $private;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private \DateTimeInterface $event_date;
+    private \DateTimeInterface $eventDate;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
-    private \DateTimeInterface $rsvp_date;
+    private \DateTimeInterface $rsvpDate;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', nullable: false)]
@@ -49,11 +49,11 @@ class Event
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Timestampable(on: 'create')]
-    private \DateTimeInterface $created_at;
+    private \DateTimeInterface $createdAt;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Timestampable(on: 'update')]
-    private \DateTimeInterface $updated_at;
+    private \DateTimeInterface $updatedAt;
 
     #[ORM\ManyToMany(targetEntity: Guest::class, mappedBy: 'events')]
     private Collection $guests;
@@ -87,48 +87,48 @@ class Event
 
     public function getEventDate(): ?\DateTimeInterface
     {
-        return $this->event_date;
+        return $this->eventDate;
     }
 
-    public function setEventDate(\DateTimeInterface $event_date): static
+    public function setEventDate(\DateTimeInterface $eventDate): static
     {
-        $this->event_date = $event_date;
+        $this->eventDate = $eventDate;
 
         return $this;
     }
 
     public function getRsvpDate(): ?\DateTimeInterface
     {
-        return $this->rsvp_date;
+        return $this->rsvpDate;
     }
 
-    public function setRsvpDate(\DateTimeInterface $rsvp_date): static
+    public function setRsvpDate(\DateTimeInterface $rsvpDate): static
     {
-        $this->rsvp_date = $rsvp_date;
+        $this->rsvpDate = $rsvpDate;
 
         return $this;
     }
 
     public function getCreatedAt(): ?\DateTimeInterface
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $created_at): static
+    public function setCreatedAt(\DateTimeInterface $createdAt): static
     {
-        $this->created_at = $created_at;
+        $this->createdAt = $createdAt;
 
         return $this;
     }
 
     public function getUpdatedAt(): ?\DateTimeInterface
     {
-        return $this->updated_at;
+        return $this->updatedAt;
     }
 
-    public function setUpdatedAt(\DateTimeInterface $updated_at): static
+    public function setUpdatedAt(\DateTimeInterface $updatedAt): static
     {
-        $this->updated_at = $updated_at;
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }
@@ -147,7 +147,7 @@ class Event
 
     public function getEventType(): EventType
     {
-        return $this->event_type;
+        return $this->eventType;
     }
 
     public function getDescription(): string
@@ -189,9 +189,9 @@ class Event
         $this->private = $private;
     }
 
-    public function setEventType(EventType $event_type): static
+    public function setEventType(EventType $eventType): static
     {
-        $this->event_type = $event_type;
+        $this->eventType = $eventType;
 
         return $this;
     }
