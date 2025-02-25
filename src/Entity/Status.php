@@ -8,10 +8,6 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: StatusRepository::class)]
 class Status
 {
-    /**
-     * @var int[]
-     * This represents the status flow of an event
-     */
     const INTERNAL_STATUS_FLOW = [
         self::ACTIVE,
         self::STARTED,
