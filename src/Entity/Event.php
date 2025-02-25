@@ -65,6 +65,9 @@ class Event
     #[ORM\JoinColumn(nullable: true)]
     private ?Location $location = null;
 
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    private ?\DateTimeInterface $endDate = null;
+
     public function __construct()
     {
         $this->guests = new ArrayCollection();
@@ -245,6 +248,18 @@ class Event
     public function setLocationId(?Location $location): static
     {
         $this->location = $location;
+
+        return $this;
+    }
+
+    public function getEndDate(): ?\DateTimeInterface
+    {
+        return $this->endDate;
+    }
+
+    public function setEndDate(\DateTimeInterface $endDate): static
+    {
+        $this->endDate = $endDate;
 
         return $this;
     }
