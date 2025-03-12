@@ -38,6 +38,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'user', targetEntity: Event::class)]
     private Collection $events;
 
+    #[ORM\OneToOne(mappedBy: 'user', cascade: ['persist', 'remove'])]
+    private ?UserProfile $userProfile = null;
+
     public function __construct()
     {
         $this->events = new ArrayCollection();
@@ -151,6 +154,23 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $event->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getUserProfile(): ?UserProfile
+    {
+        return $this->userProfile;
+    }
+
+    public function setUserProfile(UserProfile $userProfile): static
+    {
+        // set the owning side of the relation if necessary
+        if ($userProfile->getUser() !== $this) {
+            $userProfile->setUser($this);
+        }
+
+        $this->userProfile = $userProfile;
 
         return $this;
     }
