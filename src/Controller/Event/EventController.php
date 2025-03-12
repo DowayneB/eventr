@@ -61,11 +61,18 @@ class EventController extends EventrController
         }
 
         $eventDate = new DateTime($this->get($request, 'event_date'));
+        $endDate = new DateTime($this->get($request, 'end_date'));
         $rsvpDate = new DateTime($this->get($request, 'rsvp_date'));
 
         if (DateTimeImmutable::createFromMutable($eventDate)->modify('- 3 day') < new DateTime()) {
             throw ExceptionHelper::validationFieldIncorrectException(
                 "Events must be created at least 3 days before the event takes place"
+            );
+        }
+
+        if ($endDate <= $eventDate) {
+            throw ExceptionHelper::validationFieldIncorrectException(
+                "End date must be later than the event date"
             );
         }
 
@@ -92,6 +99,7 @@ class EventController extends EventrController
             $this->get($request, 'description'),
             $this->get($request, 'summary'),
             $eventDate,
+            $endDate,
             $rsvpDate,
             $this->getUser(),
             $this->get($request, 'private')

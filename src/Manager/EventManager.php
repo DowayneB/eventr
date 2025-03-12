@@ -6,6 +6,7 @@ use App\Entity\Event;
 use App\Entity\EventType;
 use App\Entity\Status;
 use App\Repository\EventRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 class EventManager
@@ -43,10 +44,9 @@ class EventManager
         return $this->getEventRepository()->createQueryBuilder('e')
             ->where('e.user = :user')
             ->andWhere('e.status != :cancelled')
-            ->setParameters([
-                'user' => $user,
-                'cancelled' => Status::CANCELLED
-            ])->getQuery()->getResult();
+            ->setParameter('user', $user)
+            ->setParameter('cancelled', Status::CANCELLED)
+            ->getQuery()->getResult();
 
     }
 
@@ -55,6 +55,7 @@ class EventManager
         string $eventDescription,
         ?string $summary,
         \DateTime $eventDate,
+        \DateTime $endDate,
         \DateTime $rsvpDate,
         UserInterface $user,
         bool $private
@@ -65,6 +66,7 @@ class EventManager
         $event->setDescription($eventDescription);
         $event->setSummary($summary);
         $event->setEventDate($eventDate);
+        $event->setEndDate($endDate);
         $event->setUser($user);
         $event->setRsvpDate($rsvpDate);
         $event->setStatus(
@@ -97,9 +99,8 @@ class EventManager
             ->where('e.user != :user')
             ->andWhere('e.status != :cancelled')
             ->andWhere('e.private = false')
-            ->setParameters([
-                'user' => $user,
-                'cancelled' => Status::CANCELLED
-            ])->getQuery()->getResult();
+            ->setParameter('user', $user)
+            ->setParameter('cancelled', Status::CANCELLED)
+            ->getQuery()->getResult();
     }
 }
