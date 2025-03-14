@@ -4,8 +4,10 @@ namespace App\Entity;
 
 use App\Repository\UserProfileRepository;
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: UserProfileRepository::class)]
+#[Serializer\ExclusionPolicy("all")]
 class UserProfile
 {
     #[ORM\Id]
@@ -14,6 +16,7 @@ class UserProfile
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Serializer\Expose]
     private ?string $name = null;
 
     #[ORM\OneToOne(inversedBy: 'userProfile', cascade: ['persist', 'remove'])]
@@ -21,12 +24,11 @@ class UserProfile
     private ?User $user = null;
 
     #[ORM\Column(length: 255)]
+    #[Serializer\Expose]
     private ?string $surname = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $emailAddress = null;
-
-    #[ORM\Column(length: 255)]
+    #[Serializer\Expose]
     private ?string $cellNumber = null;
 
     public function getId(): ?int
@@ -66,18 +68,6 @@ class UserProfile
     public function setSurname(string $surname): static
     {
         $this->surname = $surname;
-
-        return $this;
-    }
-
-    public function getEmailAddress(): ?string
-    {
-        return $this->emailAddress;
-    }
-
-    public function setEmailAddress(string $emailAddress): static
-    {
-        $this->emailAddress = $emailAddress;
 
         return $this;
     }
