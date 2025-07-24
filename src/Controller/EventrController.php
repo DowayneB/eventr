@@ -29,8 +29,7 @@ class EventrController extends AbstractController
         );
     }
 
-
-    protected function makeValidationFailureResponse(string $field, string $message)
+    protected function makeValidationFailureResponse(string $field, string $message, $statusCode = Response::HTTP_BAD_REQUEST): JsonResponse
     {
         return $this->json(
             [
@@ -41,7 +40,7 @@ class EventrController extends AbstractController
                     ]
                 ]
             ],
-            Response::HTTP_BAD_REQUEST
+            $statusCode
         );
     }
 
