@@ -6,12 +6,14 @@ use App\Controller\EventrController;
 use App\Entity\Event;
 use App\Entity\EventType;
 use App\Entity\Guest;
+use App\Entity\Location;
 use App\Entity\Status;
 use App\Exception\ActionProhibitedException;
 use App\Exception\NotFoundException;
 use App\Helper\ExceptionHelper;
 use App\Manager\EventManager;
 use App\Manager\EventTypeManager;
+use App\Manager\LocationManager;
 use App\Manager\StatusManager;
 use DateTime;
 use DateTimeImmutable;
@@ -19,6 +21,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route(
@@ -36,25 +39,30 @@ class EventController extends EventrController
         EventTypeManager       $eventTypeManager,
         Request                $request,
         EntityManagerInterface $entityManager,
-        EventManager           $eventManager
+        EventManager           $eventManager,
+        LocationManager        $locationManager
     ): JsonResponse
     {
         if (!$this->get($request, 'event_type_id')) {
-            throw ExceptionHelper::validationFieldRequiredException("event_type_id");
+            return $this->makeValidationFailureResponse('event_type_id', 'Event type is required.');
         }
 
         $eventType = $eventTypeManager->getEventType($this->get($request, 'event_type_id'));
 
         if (!$eventType instanceof EventType) {
-            throw new Exception("No event type found with given ID");
+            return $this->makeValidationFailureResponse("event_type_id","No event type found with given ID");
         }
 
         if (!$this->get($request, 'event_date')) {
-            throw ExceptionHelper::validationFieldRequiredException("event_date");
+            return $this->makeValidationFailureResponse("event_date","Event date is required.");
+        }
+
+        if (!$this->get($request, 'end_date')) {
+            return $this->makeValidationFailureResponse("end_date","End date is required.");
         }
 
         if (!$this->get($request, 'rsvp_date')) {
-            throw ExceptionHelper::validationFieldRequiredException("rsvp_date");
+            return $this->makeValidationFailureResponse("rsvp_date","RSVP date is required.");
         }
 
         $eventDate = new DateTime($this->get($request, 'event_date'));
@@ -62,32 +70,61 @@ class EventController extends EventrController
         $rsvpDate = new DateTime($this->get($request, 'rsvp_date'));
 
         if (DateTimeImmutable::createFromMutable($eventDate)->modify('- 3 day') < new DateTime()) {
-            throw ExceptionHelper::validationFieldIncorrectException(
-                "Events must be created at least 3 days before the event takes place"
+            return $this->makeValidationFailureResponse(
+                "event_date",
+                "Events must be created at least 3 days before the event takes place."
             );
         }
 
         if ($endDate <= $eventDate) {
-            throw ExceptionHelper::validationFieldIncorrectException(
-                "End date must be later than the event date"
+            return $this->makeValidationFailureResponse(
+                "end_date",
+                "End date must be greater than start date."
             );
         }
 
         if ($rsvpDate >= (new DateTime())->setTimestamp($eventDate->getTimestamp())->modify('-1 day')) {
-            throw ExceptionHelper::validationFieldIncorrectException(
-                "RSVP date must be at least 1 day before the event takes place"
+            return $this->makeValidationFailureResponse(
+                "rsvp_date",
+                "RSVP must be at least 1 day before the event takes place."
             );
         }
 
         if ($rsvpDate <= new \DateTime('now')) {
-            throw ExceptionHelper::validationFieldIncorrectException(
-                "RSVP date cannot be in the past"
+            return $this->makeValidationFailureResponse(
+                "rsvp_date",
+                "RSVP date can not be in the past"
             );
         }
 
         if (!$this->get($request, 'description')) {
-            throw ExceptionHelper::validationFieldRequiredException(
-                'Description'
+            return $this->makeValidationFailureResponse(
+                "description",
+                "Description is required."
+            );
+        }
+
+        if (!$this->get($request, 'summary')) {
+            return $this->makeValidationFailureResponse(
+                "summary",
+                "Summary is required."
+            );
+        }
+
+        if (!$this->get($request, 'location_id')) {
+            return $this->makeValidationFailureResponse(
+                "location_id",
+                "Location is required."
+            );
+        }
+
+        $location = $locationManager->findLocation($this->get($request, 'location_id'));
+
+        if (!$location instanceof Location) {
+            return $this->makeValidationFailureResponse(
+                "location_id",
+                "Could not find a location.",
+                Response::HTTP_NOT_FOUND
             );
         }
 
@@ -95,17 +132,18 @@ class EventController extends EventrController
             $eventType,
             $this->get($request, 'description'),
             $this->get($request, 'summary'),
-            $this->get($request, 'place_id'),
+            $location,
             $eventDate,
             $endDate,
             $rsvpDate,
             $this->getUser(),
+            $this->get($request, 'private') ?? false
         );
 
         $entityManager->persist($event);
         $entityManager->flush();
 
-        return $this->makeSerializedResponse(
+        return $this->makeSuccessfulResponse(
             [
                 'event' => $event
             ]
@@ -121,7 +159,7 @@ class EventController extends EventrController
         EventManager $eventManager
     ): JsonResponse
     {
-        return $this->makeSerializedResponse(
+        return $this->makeSuccessfulResponse(
             [
                 'event' => $eventManager->getActiveEventsByUser($this->getUser())
             ]
@@ -136,7 +174,7 @@ class EventController extends EventrController
         EventManager $eventManager
     ): JsonResponse
     {
-        return $this->makeSerializedResponse(
+        return $this->makeSuccessfulResponse(
             [
                 'event' => $eventManager->getPublicEventsForUser($this->getUser())
             ]
@@ -153,7 +191,7 @@ class EventController extends EventrController
         EventManager $eventManager
     ): JsonResponse
     {
-        return $this->makeSerializedResponse(
+        return $this->makeSuccessfulResponse(
             [
                 'event' => $eventManager->getEvent(
                     $eventId,
@@ -198,7 +236,7 @@ class EventController extends EventrController
 
         $entityManager->flush();
 
-        return $this->makeSerializedResponse([
+        return $this->makeSuccessfulResponse([
             'event' => $event
         ]);
     }
@@ -234,7 +272,7 @@ class EventController extends EventrController
 
         $entityManager->flush();
 
-        return $this->makeSerializedResponse([
+        return $this->makeSuccessfulResponse([
             'event' => $event
         ]);
     }
@@ -270,7 +308,7 @@ class EventController extends EventrController
 
         $entityManager->flush();
 
-        return $this->makeSerializedResponse([
+        return $this->makeSuccessfulResponse([
             'event' => $event
         ]);
     }
@@ -291,7 +329,7 @@ class EventController extends EventrController
 
         //TODO: Send invitation mail
 
-        return $this->makeSerializedResponse([
+        return $this->makeSuccessfulResponse([
             'event' => $event
         ]);
     }
