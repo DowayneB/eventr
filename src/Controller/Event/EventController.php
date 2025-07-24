@@ -50,7 +50,11 @@ class EventController extends EventrController
         $eventType = $eventTypeManager->getEventType($this->get($request, 'event_type_id'));
 
         if (!$eventType instanceof EventType) {
-            return $this->makeValidationFailureResponse("event_type_id","No event type found with given ID");
+            return $this->makeValidationFailureResponse(
+                "event_type_id",
+                "No event type found with given ID",
+                Response::HTTP_NOT_FOUND
+            );
         }
 
         if (!$this->get($request, 'event_date')) {
