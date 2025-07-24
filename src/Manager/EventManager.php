@@ -67,7 +67,7 @@ class EventManager
         $event->setEventType($eventType);
         $event->setDescription($eventDescription);
         $event->setSummary($summary);
-        $event->setLocationId()
+        $event->setLocation($location);
         $event->setEventDate($eventDate);
         $event->setEndDate($endDate);
         $event->setUser($user);

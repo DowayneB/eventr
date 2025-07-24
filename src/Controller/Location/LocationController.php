@@ -39,7 +39,7 @@ class LocationController extends EventrController
         $entityManager->persist($location);
         $entityManager->flush();
 
-        return $this->makeSerializedResponse([
+        return $this->makeSuccessfulResponse([
             'location' => $location
         ]);
 

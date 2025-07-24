@@ -16,7 +16,7 @@ final class UserProfileController extends EventrController
     #[Route(null, name: 'app_user_profile', methods: ["GET"])]
     public function index(): Response
     {
-        return $this->makeSerializedResponse([
+        return $this->makeSuccessfulResponse([
                 'user_profile' => $this->getUser()->getUserProfile()
         ]);
     }
@@ -36,7 +36,7 @@ final class UserProfileController extends EventrController
         $entityManager->persist($userProfile);
         $entityManager->flush($user);
 
-        return $this->makeSerializedResponse([
+        return $this->makeSuccessfulResponse([
             'user_profile' => $userProfile
         ]);
     }

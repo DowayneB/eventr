@@ -16,7 +16,7 @@ class EventTypeController extends EventrController
     #[Route('', name: 'app_event_type')]
     public function index(EventTypeManager $eventTypeManager): Response
     {
-        return $this->makeSerializedResponse([
+        return $this->makeSuccessfulResponse([
             'event-type' => $eventTypeManager->getEventTypes()
         ]);
     }

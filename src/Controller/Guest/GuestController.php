@@ -19,14 +19,15 @@ use Symfony\Component\Security\Core\User\UserInterface;
 #[Route(
     "/api/guest",
     name: "event_type_main"
-)]class GuestController extends EventrController
+)]
+class GuestController extends EventrController
 {
     use JsonRequest;
 
     #[Route('', name: 'app_guest_list', methods: ["GET"])]
     public function listGuests(GuestManager $guestManager, UserInterface $user): Response
     {
-        return $this->makeSerializedResponse([
+        return $this->makeSuccessfulResponse([
             'guests' => $guestManager->getGuestsByUser($user)
         ]);
     }
@@ -84,7 +85,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
         $entityManager->persist($guest);
         $entityManager->flush($guest);
 
-        return $this->makeSerializedResponse([
+        return $this->makeSuccessfulResponse([
             'guest' => $guest
         ]);
     }
