@@ -4,6 +4,7 @@ namespace App\Manager;
 
 use App\Entity\Event;
 use App\Entity\EventType;
+use App\Entity\Location;
 use App\Entity\Status;
 use App\Repository\EventRepository;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -54,6 +55,7 @@ class EventManager
         EventType $eventType,
         string $eventDescription,
         ?string $summary,
+        Location $location,
         \DateTime $eventDate,
         \DateTime $endDate,
         \DateTime $rsvpDate,
@@ -65,6 +67,7 @@ class EventManager
         $event->setEventType($eventType);
         $event->setDescription($eventDescription);
         $event->setSummary($summary);
+        $event->setLocationId()
         $event->setEventDate($eventDate);
         $event->setEndDate($endDate);
         $event->setUser($user);

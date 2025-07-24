@@ -39,6 +39,7 @@ class EventController extends EventrController
         EventManager           $eventManager
     ): JsonResponse
     {
+        throw new \Exception($this->get($request, 'place_id'));
         if (!$this->get($request, 'event_type_id')) {
             throw ExceptionHelper::validationFieldRequiredException("event_type_id");
         }
@@ -95,6 +96,7 @@ class EventController extends EventrController
             $eventType,
             $this->get($request, 'description'),
             $this->get($request, 'summary'),
+            $this->get($request, 'place_id'),
             $eventDate,
             $endDate,
             $rsvpDate,

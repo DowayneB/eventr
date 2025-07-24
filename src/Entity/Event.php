@@ -240,12 +240,12 @@ class Event
         return $this;
     }
 
-    public function getLocationId(): ?Location
+    public function getLocation(): ?Location
     {
         return $this->location;
     }
 
-    public function setLocationId(?Location $location): static
+    public function setLocation(?Location $location): static
     {
         $this->location = $location;
 
