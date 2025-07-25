@@ -24,8 +24,8 @@ class Guest
     #[ORM\Column(length: 255)]
     private ?string $cellNumber = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTimeInterface $birthDate = null;
+    #[ORM\Column(type: Types::INTEGER, nullable: false)]
+    private int $age = 0;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', nullable: false)]
@@ -110,14 +110,14 @@ class Guest
         return $this;
     }
 
-    public function getBirthDate(): ?\DateTimeInterface
+    public function getAge(): int
     {
-        return $this->birthDate;
+        return $this->age;
     }
 
-    public function setBirthDate(?\DateTimeInterface $birthDate): static
+    public function setAge(int $age): static
     {
-        $this->birthDate = $birthDate;
+        $this->age = $age;
 
         return $this;
     }
