@@ -3,6 +3,7 @@
 namespace App\Controller\EventType;
 
 use App\Controller\EventrController;
+use App\Entity\EventType;
 use App\Manager\EventTypeManager;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,8 +28,19 @@ class EventTypeController extends EventrController
         EventTypeManager $eventTypeManager,
         Request          $request,
     ): Response {
+
+        $eventType = $eventTypeManager->getEventType($request->get('event-type-id'));
+
+        if (!$eventType instanceof EventType) {
+            return $this->makeValidationFailureResponse(
+                'event_id',
+                "Guest with ID {$request->get('guest_id')} not found.",
+                Response::HTTP_NOT_FOUND
+            );
+        }
+
         return $this->makeSuccessfulResponse([
-            'event-type' => $eventTypeManager->getEventType($this->get($request, $request->attributes->get('event-type-id'))),
+            'event-type' => $eventType,
         ]);
     }
 }
