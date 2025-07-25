@@ -31,7 +31,7 @@ class GuestManager
     public function createGuest(
         UserInterface $user,
         string $name,
-        \DateTimeInterface $birthDate,
+        int $age,
         string $cellNumber,
         string $emailAddress
     ): Guest
@@ -39,10 +39,21 @@ class GuestManager
         $guest = new Guest();
         $guest->setUser($user);
         $guest->setName($name);
-        $guest->setBirthDate($birthDate);
+        $guest->setAge($age);
         $guest->setCellNumber($cellNumber);
         $guest->setEmailAddress($emailAddress);
 
         return $guest;
+    }
+
+    public function findGuest(
+        int $id,
+        UserInterface $user
+    ): ?Guest
+    {
+        return $this->getRepository()->findOneBy([
+            'id' => $id,
+            'user' => $user
+        ]);
     }
 }
