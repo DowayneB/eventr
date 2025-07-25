@@ -19,12 +19,12 @@ class EventrController extends AbstractController
         $this->serializer = $serializer;
     }
 
-    protected function makeSuccessfulResponse(array $response, int $statusCode = Response::HTTP_OK): JsonResponse
+    protected function makeSuccessfulResponse(array $response, int $statusCode = Response::HTTP_OK, array $headers = []): JsonResponse
     {
         return new JsonResponse(
             $this->getSerializer()->serialize($response, 'json'),
             $statusCode,
-            [],
+            $headers,
             true
         );
     }
