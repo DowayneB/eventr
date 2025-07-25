@@ -5,12 +5,8 @@ namespace App\Controller\Event;
 use App\Controller\EventrController;
 use App\Entity\Event;
 use App\Entity\EventType;
-use App\Entity\Guest;
 use App\Entity\Location;
 use App\Entity\Status;
-use App\Exception\ActionProhibitedException;
-use App\Exception\NotFoundException;
-use App\Helper\ExceptionHelper;
 use App\Manager\EventManager;
 use App\Manager\EventTypeManager;
 use App\Manager\LocationManager;
@@ -34,7 +30,7 @@ class EventController extends EventrController
         name: "api_event_create_post",
         methods: ["POST"]
     )]
-    public function testApi(
+    public function createEvent(
         EventTypeManager       $eventTypeManager,
         Request                $request,
         EntityManagerInterface $entityManager,
@@ -149,12 +145,21 @@ class EventController extends EventrController
         return $this->makeSuccessfulResponse(
             [
                 'event' => $event
+            ],
+            Response::HTTP_CREATED,
+            [
+                'Location' => $this->generateUrl(
+                    'event_mainapi_event_get',
+                    [
+                        'event_id' => $event->getId()
+                    ]
+                )
             ]
         );
     }
 
     #[Route(
-        "",
+        null,
         name: 'api_event_list_get',
         methods: ["GET"]
     )]
@@ -168,6 +173,7 @@ class EventController extends EventrController
             ]
         );
     }
+
     #[Route(
         "/public",
         name: 'api_public_event_list_get',
@@ -185,7 +191,7 @@ class EventController extends EventrController
     }
 
     #[Route(
-        "/{eventId}",
+        "/{event_id}",
         name: 'api_event_get',
         methods: ["GET"]
     )]
@@ -204,10 +210,6 @@ class EventController extends EventrController
         );
     }
 
-    /**
-     * @throws NotFoundException
-     * @throws ActionProhibitedException
-     */
     #[Route(
         "/{eventId}/cancel",
         name: 'api_event_put',
@@ -226,11 +228,13 @@ class EventController extends EventrController
         );
 
         if (!$event instanceof Event) {
-            throw ExceptionHelper::eventNotFoundException();
+            return $this->makeValidationFailureResponse('event_id', "Event with ID {$eventId} not found.");
         }
 
         if ($event->getStatus()->getId() === Status::CANCELLED) {
-            throw ExceptionHelper::alreadyActionedException();
+            return $this->makeSuccessfulResponse([
+                'event' => $event
+            ]);
         }
 
         $event->setStatus(
@@ -244,18 +248,15 @@ class EventController extends EventrController
         ]);
     }
 
-    /**
-     * @throws ActionProhibitedException
-     * @throws NotFoundException
-     */
     #[Route(
-        "/{eventId}/make-public",
-        methods: ["PUT"]
+        "/{eventId}/visibility",
+        methods: ["PATCH"]
     )]
     public function makeEventPublic(
         int                    $eventId,
         EventManager           $eventManager,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        Request                $request
     ): JsonResponse
     {
         $event = $eventManager->getEvent(
@@ -264,14 +265,20 @@ class EventController extends EventrController
         );
 
         if (!$event instanceof Event) {
-            throw ExceptionHelper::eventNotFoundException();
+            return $this->makeValidationFailureResponse('event_id', "Event with ID {$eventId} not found.");
         }
 
-        if (!$event->isPrivate()) {
-            throw ExceptionHelper::alreadyActionedException();
+        if ($this->get($request, 'is_private') === null) {
+            return $this->makeValidationFailureResponse('is_private', "is_private is required.");
         }
 
-        $event->setPrivate(false);
+        if ($event->isPrivate() === $this->get($request, 'is_private')) {
+            return $this->makeSuccessfulResponse([
+                'event' => $event
+            ]);
+        }
+
+        $event->setPrivate((bool)$this->get($request, 'is_private'));
 
         $entityManager->flush();
 
@@ -279,62 +286,4 @@ class EventController extends EventrController
             'event' => $event
         ]);
     }
-
-    /**
-     * @throws NotFoundException
-     * @throws ActionProhibitedException
-     */
-    #[Route(
-        "/{eventId}/make-private",
-        methods: ["PUT"]
-    )]
-    public function makeEventPrivate(
-        int                    $eventId,
-        EventManager           $eventManager,
-        EntityManagerInterface $entityManager
-    ): JsonResponse
-    {
-        $event = $eventManager->getEvent(
-            $eventId,
-            $this->getUser()
-        );
-
-        if (!$event instanceof Event) {
-            throw ExceptionHelper::eventNotFoundException();
-        }
-
-        if ($event->isPrivate()) {
-            throw ExceptionHelper::alreadyActionedException();
-        }
-
-        $event->setPrivate(true);
-
-        $entityManager->flush();
-
-        return $this->makeSuccessfulResponse([
-            'event' => $event
-        ]);
-    }
-
-    #[Route(
-        "/{event}/invite/{guest}",
-        methods: ["POST"]
-    )]
-    public function inviteGuest(
-        Event $event,
-        Guest $guest,
-        EntityManagerInterface $objectManager
-    ): JsonResponse
-    {
-        $event->addGuest($guest);
-        $objectManager->persist($event);
-        $objectManager->flush();
-
-        //TODO: Send invitation mail
-
-        return $this->makeSuccessfulResponse([
-            'event' => $event
-        ]);
-    }
-
 }
