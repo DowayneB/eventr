@@ -40,17 +40,17 @@ class GuestController extends EventrController
         methods: ["GET"]
     )]
     public function getGuest(
+        int $guestId,
         GuestManager  $guestManager,
         UserInterface $user,
-        Request       $request
     ): Response
     {
-        $guest = $guestManager->findGuest($request->get('guest_id'), $user);
+        $guest = $guestManager->findGuest($guestId, $user);
 
         if (!$guest instanceof Guest) {
             return $this->makeValidationFailureResponse(
                 'guest_id',
-                "Guest with ID {$request->get('guest_id')} not found.",
+                "Guest with ID {$guestId} not found.",
                 Response::HTTP_NOT_FOUND
             );
         }

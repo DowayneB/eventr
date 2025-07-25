@@ -25,16 +25,16 @@ class EventTypeController extends EventrController
 
     #[Route('/{event-type-id}', name: 'api_event_type')]
     public function eventType(
+        int              $eventTypeId,
         EventTypeManager $eventTypeManager,
-        Request          $request,
     ): Response {
 
-        $eventType = $eventTypeManager->getEventType($request->get('event-type-id'));
+        $eventType = $eventTypeManager->getEventType($eventTypeId);
 
         if (!$eventType instanceof EventType) {
             return $this->makeValidationFailureResponse(
                 'event_id',
-                "Guest with ID {$request->get('guest_id')} not found.",
+                "Guest with ID {$eventTypeId} not found.",
                 Response::HTTP_NOT_FOUND
             );
         }
