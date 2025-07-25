@@ -49,7 +49,7 @@ class GuestController extends EventrController
 
         if (!$guest instanceof Guest) {
             return $this->makeValidationFailureResponse(
-                'event_id',
+                'guest_id',
                 "Guest with ID {$request->get('guest_id')} not found.",
                 Response::HTTP_NOT_FOUND
             );
