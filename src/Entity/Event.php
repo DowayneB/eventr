@@ -9,63 +9,80 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation\Timestampable;
 use Symfony\Component\Security\Core\User\UserInterface;
+use JMS\Serializer\Annotation as Serializer;
 
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
+#[Serializer\ExclusionPolicy("all")]
 class Event
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Serializer\Expose]
     private ?int $id = null;
 
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, unique: false)]
+    #[Serializer\Expose]
     private EventType $eventType;
 
     #[ORM\Column(type: Types::STRING)]
+    #[Serializer\Expose]
     private string $description;
 
     #[ORM\Column(type: Types::STRING)]
+    #[Serializer\Expose]
     private ?string $summary;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, unique: false)]
+    #[Serializer\Expose]
     private Status $status;
 
     #[ORM\Column(type: Types::BOOLEAN)]
+    #[Serializer\Expose]
     private bool $private;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Serializer\Expose]
     private \DateTimeInterface $eventDate;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Serializer\Expose]
     private \DateTimeInterface $rsvpDate;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(name: 'user_id', nullable: false)]
+    #[Serializer\Expose]
     private UserInterface $user;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Timestampable(on: 'create')]
+    #[Serializer\Expose]
     private \DateTimeInterface $createdAt;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Timestampable(on: 'update')]
+    #[Serializer\Expose]
     private \DateTimeInterface $updatedAt;
 
     #[ORM\ManyToMany(targetEntity: Guest::class, mappedBy: 'events')]
+    #[Serializer\Expose]
     private Collection $guests;
 
     #[ORM\OneToOne(mappedBy: 'event', cascade: ['persist', 'remove'])]
+    #[Serializer\Expose]
     private ?Invitation $invitation = null;
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: true)]
+    #[Serializer\Expose]
     private ?Location $location = null;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
+    #[Serializer\Expose]
     private ?\DateTimeInterface $endDate = null;
 
     public function __construct()
