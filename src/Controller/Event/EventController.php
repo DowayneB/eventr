@@ -2,7 +2,6 @@
 
 namespace App\Controller\Event;
 
-use App\Controller\EventrController;
 use App\Entity\Event;
 use App\Entity\EventType;
 use App\Entity\Location;
