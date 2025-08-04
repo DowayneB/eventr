@@ -38,11 +38,11 @@ class EventController extends EventrController
         LocationManager        $locationManager
     ): JsonResponse
     {
-        if (!$this->get($request, 'event_type_id')) {
+        if (!$request->getPayload()->get( 'event_type_id')) {
             return $this->makeValidationFailureResponse('event_type_id', 'Event type is required.');
         }
 
-        $eventType = $eventTypeManager->getEventType($this->get($request, 'event_type_id'));
+        $eventType = $eventTypeManager->getEventType($request->getPayload()->get( 'event_type_id'));
 
         if (!$eventType instanceof EventType) {
             return $this->makeValidationFailureResponse(
@@ -52,21 +52,21 @@ class EventController extends EventrController
             );
         }
 
-        if (!$this->get($request, 'event_date')) {
+        if (!$request->getPayload()->get( 'event_date')) {
             return $this->makeValidationFailureResponse("event_date","Event date is required.");
         }
 
-        if (!$this->get($request, 'end_date')) {
+        if (!$request->getPayload()->get( 'end_date')) {
             return $this->makeValidationFailureResponse("end_date","End date is required.");
         }
 
-        if (!$this->get($request, 'rsvp_date')) {
+        if (!$request->getPayload()->get( 'rsvp_date')) {
             return $this->makeValidationFailureResponse("rsvp_date","RSVP date is required.");
         }
 
-        $eventDate = new DateTime($this->get($request, 'event_date'));
-        $endDate = new DateTime($this->get($request, 'end_date'));
-        $rsvpDate = new DateTime($this->get($request, 'rsvp_date'));
+        $eventDate = new DateTime($request->getPayload()->get( 'event_date'));
+        $endDate = new DateTime($request->getPayload()->get( 'end_date'));
+        $rsvpDate = new DateTime($request->getPayload()->get('rsvp_date'));
 
         if (DateTimeImmutable::createFromMutable($eventDate)->modify('- 3 day') < new DateTime()) {
             return $this->makeValidationFailureResponse(
@@ -96,28 +96,28 @@ class EventController extends EventrController
             );
         }
 
-        if (!$this->get($request, 'description')) {
+        if (!$request->getPayload()->get( 'description')) {
             return $this->makeValidationFailureResponse(
                 "description",
                 "Description is required."
             );
         }
 
-        if (!$this->get($request, 'summary')) {
+        if (!$request->getPayload()->get( 'summary')) {
             return $this->makeValidationFailureResponse(
                 "summary",
                 "Summary is required."
             );
         }
 
-        if (!$this->get($request, 'location_id')) {
+        if (!$request->getPayload()->get( 'location_id')) {
             return $this->makeValidationFailureResponse(
                 "location_id",
                 "Location is required."
             );
         }
 
-        $location = $locationManager->findLocation($this->get($request, 'location_id'));
+        $location = $locationManager->findLocation($request->getPayload()->get('location_id'));
 
         if (!$location instanceof Location) {
             return $this->makeValidationFailureResponse(
@@ -129,14 +129,14 @@ class EventController extends EventrController
 
         $event = $eventManager->createEvent(
             $eventType,
-            $this->get($request, 'description'),
-            $this->get($request, 'summary'),
+            $request->getPayload()->get( 'description'),
+            $request->getPayload()->get( 'summary'),
             $location,
             $eventDate,
             $endDate,
             $rsvpDate,
             $this->getUser(),
-            $this->get($request, 'private') ?? false
+            $request->getPayload()->get( 'private') ?? false
         );
 
         $entityManager->persist($event);
@@ -268,17 +268,17 @@ class EventController extends EventrController
             return $this->makeValidationFailureResponse('event_id', "Event with ID {$eventId} not found.");
         }
 
-        if ($this->get($request, 'is_private') === null) {
+        if ($request->getPayload()->get('is_private') === null) {
             return $this->makeValidationFailureResponse('is_private', "is_private is required.");
         }
 
-        if ($event->isPrivate() === $this->get($request, 'is_private')) {
+        if ($event->isPrivate() === $request->getPayload()->get( 'is_private')) {
             return $this->makeSuccessfulResponse([
                 'event' => $event
             ]);
         }
 
-        $event->setPrivate((bool)$this->get($request, 'is_private'));
+        $event->setPrivate((bool)$request->getPayload()->get('is_private'));
 
         $entityManager->flush();
 
