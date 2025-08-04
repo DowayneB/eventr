@@ -2,38 +2,40 @@
 
 namespace App\Controller\Guest;
 
-use App\Controller\EventrController;
 use App\Entity\Guest;
-use App\Exception\ValidationException;
-use App\Helper\ExceptionHelper;
-use App\Helper\JsonRequest;
-use App\Helper\ValidationHelper;
 use App\Manager\GuestManager;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Exception\ORMException;
-use Doctrine\ORM\OptimisticLockException;
+use JMS\Serializer\SerializerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[Route(
     "/api/guest",
-    name: "guest_main"
 )]
-class GuestController extends EventrController
+class GuestController extends AbstractController
 {
     #[Route('', name: 'api_guests', methods: ["GET"])]
-    public function listGuests(GuestManager $guestManager, UserInterface $user): Response
+    public function listGuests(
+        GuestManager $guestManager,
+        UserInterface $user,
+        SerializerInterface $serializer,
+    ): JsonResponse
     {
-        return $this->makeSuccessfulResponse([
-            'guests' => $guestManager->getGuestsByUser($user)
-        ]);
+        return new JsonResponse(
+            $serializer->serialize(['guests' => $guestManager->getGuestsByUser($user)], 'json'),
+            Response::HTTP_OK,
+            [],true
+        );
     }
 
     #[Route(
-        '/{guest_id}',
+        '/{guestId}',
         name: 'api_get_guest',
         methods: ["GET"]
     )]
@@ -41,15 +43,19 @@ class GuestController extends EventrController
         int $guestId,
         GuestManager  $guestManager,
         UserInterface $user,
+        SerializerInterface $serializer,
     ): Response
     {
         $guest = $guestManager->findGuest($guestId, $user);
 
         if (!$guest instanceof Guest) {
-            return $this->makeValidationFailureResponse(
-                'guest_id',
-                "Guest with ID {$guestId} not found.",
-                Response::HTTP_NOT_FOUND
+            return new JsonResponse(
+                $serializer->serialize(['errors' => [
+                    'field' => 'guestId',
+                    'message' => "Guest with id {$guestId} not found",
+                ]], 'json'),
+                Response::HTTP_NOT_FOUND,
+                [],true
             );
         }
 
@@ -64,37 +70,51 @@ class GuestController extends EventrController
         GuestManager $guestManager,
         UserInterface $user,
         Request $request,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        SerializerInterface $serializer,
+        ValidatorInterface $validator
     ): Response
     {
+        $constraints = new Assert\Collection([
+            'name' => new Assert\Type('string'),
+            'age' => new Assert\Type('integer'),
+            'cell_number' => [
+                new Assert\Type('string'),
+                new Assert\NotBlank(),
+                new Assert\Regex([
+                    'pattern' => '/^(\+?\d{1,3}[- ]?)?\d{10}$/',
+                    'message' => 'Please enter a valid cell number.',
+                ]),
+            ],
+            'email_address' => [
+                new Assert\NotBlank(),
+                new Assert\Email([
+                    'message' => 'Please enter a valid email address.',
+                ]),
+            ]
+        ]);
+
+        $violations = $validator->validate($request->getPayload()->all(),$constraints);
+
+        if (count($violations) > 0) {
+            $errors = array_map(function ($violation) {
+                return [
+                    'field' => trim($violation->getPropertyPath(), '[]'),
+                    'message' => $violation->getMessage(),
+                ];
+            },[...$violations]);
+
+            return new JsonResponse(
+                $serializer->serialize(['errors' => $errors], 'json'),
+                Response::HTTP_BAD_REQUEST,
+                [],true
+            );
+        }
+
         $name = $request->getPayload()->get('name');
         $age = $request->getPayload()->get('age');
         $cellNumber = $request->getPayload()->get('cell_number');
         $emailAddress = $request->getPayload()->get('email_address');
-
-        if (!$emailAddress) {
-            return $this->makeValidationFailureResponse('email_address', "Email address is required");
-        }
-
-        if (!ValidationHelper::validateEmailAddress($emailAddress)) {
-            return $this->makeValidationFailureResponse('email_address', "Email address is not valid");
-        }
-
-        if (!$cellNumber) {
-            return $this->makeValidationFailureResponse('cell_number', "Cell number is required");
-        }
-
-        if (!ValidationHelper::validateCellNumber($cellNumber)) {
-            return $this->makeValidationFailureResponse('cell_number', "Cell number is not valid");
-        }
-
-        if (!$name) {
-            return $this->makeValidationFailureResponse('name', "Name is required");
-        }
-
-        if (!is_int($age)) {
-            return $this->makeValidationFailureResponse('age', "Age is required");
-        }
 
         $guest = $guestManager->createGuest(
             $user,
@@ -107,12 +127,12 @@ class GuestController extends EventrController
         $entityManager->persist($guest);
         $entityManager->flush();
 
-        return $this->makeSuccessfulResponse(
-            ['guest' => $guest],
+        return new JsonResponse(
+            $serializer->serialize(['guest' => $guest], 'json'),
             Response::HTTP_CREATED,
             [
-                "Location" => $this->generateUrl('guest_mainapi_get_guest', ['guest_id' => $guest->getId()], UrlGeneratorInterface::ABSOLUTE_URL)
-            ]
+                'Location' => $this->generateUrl('api_get_guest', ['guestId' => $guest->getId()]),
+            ],true
         );
     }
 
