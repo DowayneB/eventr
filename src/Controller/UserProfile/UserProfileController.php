@@ -2,7 +2,6 @@
 
 namespace App\Controller\UserProfile;
 
-use App\Controller\EventrController;
 use App\Manager\UserProfileManager;
 use Doctrine\ORM\EntityManagerInterface;
 use JMS\Serializer\SerializerInterface;
