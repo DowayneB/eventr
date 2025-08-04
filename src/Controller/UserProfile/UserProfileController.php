@@ -26,9 +26,9 @@ final class UserProfileController extends EventrController
     {
         $userProfile = $userProfileManager->createUserProfile(
             $this->getUser(),
-            $this->get($request, 'name'),
-            $this->get($request, 'surname'),
-            $this->get($request,'cell_number')
+            $request->getPayload()->get( 'name'),
+            $request->getPayload()->get( 'surname'),
+            $request->getPayload()->get('cell_number')
         );
 
         $user->setUserProfile($userProfile);

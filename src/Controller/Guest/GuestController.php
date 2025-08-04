@@ -24,8 +24,6 @@ use Symfony\Component\Security\Core\User\UserInterface;
 )]
 class GuestController extends EventrController
 {
-    use JsonRequest;
-
     #[Route('', name: 'api_guests', methods: ["GET"])]
     public function listGuests(GuestManager $guestManager, UserInterface $user): Response
     {
@@ -69,10 +67,10 @@ class GuestController extends EventrController
         EntityManagerInterface $entityManager
     ): Response
     {
-        $name = $this->get($request,'name');
-        $age = $this->get($request,'age');
-        $cellNumber = $this->get($request,'cell_number');
-        $emailAddress = $this->get($request,'email_address');
+        $name = $request->getPayload()->get('name');
+        $age = $request->getPayload()->get('age');
+        $cellNumber = $request->getPayload()->get('cell_number');
+        $emailAddress = $request->getPayload()->get('email_address');
 
         if (!$emailAddress) {
             return $this->makeValidationFailureResponse('email_address', "Email address is required");
