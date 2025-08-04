@@ -14,16 +14,20 @@ use App\Manager\StatusManager;
 use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use JMS\Serializer\SerializerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route(
     "/api/event",
     name: "event_main"
 )]
-class EventController extends EventrController
+class EventController extends AbstractController
 {
     #[Route(
         null,
@@ -35,95 +39,128 @@ class EventController extends EventrController
         Request                $request,
         EntityManagerInterface $entityManager,
         EventManager           $eventManager,
-        LocationManager        $locationManager
+        LocationManager        $locationManager,
+        ValidatorInterface     $validator,
+        SerializerInterface    $serializer
     ): JsonResponse
     {
-        if (!$request->getPayload()->get( 'event_type_id')) {
-            return $this->makeValidationFailureResponse('event_type_id', 'Event type is required.');
+        $constraints = new Assert\Collection([
+            'event_type_id' => new Assert\Type('integer'),
+            'event_date' => new Assert\Type('integer'),
+            'end_date' => new Assert\Type('integer'),
+            'rsvp_date' => new Assert\Type('integer'),
+            'description' => new Assert\Type('string'),
+            'summary' => new Assert\Type('string'),
+            'location_id' => new Assert\Type('integer'),
+            'private' => new Assert\Optional([
+                new Assert\Type('boolean'),
+            ])
+        ]);
+
+        $violations = $validator->validate(
+            $request->getPayload()->all()
+            ,$constraints
+        );
+
+        if (count($violations) > 0) {
+            $errors = array_map(function ($violation) {
+                return [
+                    'field' => trim($violation->getPropertyPath(), '[]'),
+                    'message' => $violation->getMessage(),
+                ];
+            },[...$violations]);
+
+            return new JsonResponse(
+                $serializer->serialize(['errors' => $errors], 'json'),
+                Response::HTTP_BAD_REQUEST,
+                [],true
+            );
         }
 
         $eventType = $eventTypeManager->getEventType($request->getPayload()->get( 'event_type_id'));
 
         if (!$eventType instanceof EventType) {
-            return $this->makeValidationFailureResponse(
-                "event_type_id",
-                "No event type found with given ID",
-                Response::HTTP_NOT_FOUND
+            return new JsonResponse(
+                $serializer->serialize(['errors' => [
+                    [
+                        'field' => 'event_type_id',
+                        "message" => "Event type not found for ID {$request->getPayload()->get( 'event_type_id' )}."
+                    ]
+                ]], 'json'),
+                Response::HTTP_NOT_FOUND,
+                [],true
             );
         }
 
-        if (!$request->getPayload()->get( 'event_date')) {
-            return $this->makeValidationFailureResponse("event_date","Event date is required.");
-        }
-
-        if (!$request->getPayload()->get( 'end_date')) {
-            return $this->makeValidationFailureResponse("end_date","End date is required.");
-        }
-
-        if (!$request->getPayload()->get( 'rsvp_date')) {
-            return $this->makeValidationFailureResponse("rsvp_date","RSVP date is required.");
-        }
-
-        $eventDate = new DateTime($request->getPayload()->get( 'event_date'));
-        $endDate = new DateTime($request->getPayload()->get( 'end_date'));
-        $rsvpDate = new DateTime($request->getPayload()->get('rsvp_date'));
+        $eventDate = (new DateTime())->setTimestamp($request->getPayload()->get( 'event_date'));
+        $endDate = (new DateTime())->setTimestamp($request->getPayload()->get( 'end_date'));
+        $rsvpDate = (new DateTime())->setTimestamp($request->getPayload()->get('rsvp_date'));
 
         if (DateTimeImmutable::createFromMutable($eventDate)->modify('- 3 day') < new DateTime()) {
-            return $this->makeValidationFailureResponse(
-                "event_date",
-                "Events must be created at least 3 days before the event takes place."
+            return new JsonResponse(
+                $serializer->serialize(['errors' => [
+                    [
+                        'field' => 'event_date',
+                        "message" => "Event date must be less than 3 days before start date."
+                    ]
+                ]], 'json'),
+                Response::HTTP_BAD_REQUEST,
+                [],true
             );
         }
 
         if ($endDate <= $eventDate) {
-            return $this->makeValidationFailureResponse(
-                "end_date",
-                "End date must be greater than start date."
+            return new JsonResponse(
+                $serializer->serialize(["errors" => [
+                    [
+                        "field" => "end_date",
+                        "message" => "End date must be greater than end date."
+                    ]
+                ]
+                ], 'json'),
+                Response::HTTP_BAD_REQUEST,
+                [],true
             );
         }
 
         if ($rsvpDate >= (new DateTime())->setTimestamp($eventDate->getTimestamp())->modify('-1 day')) {
-            return $this->makeValidationFailureResponse(
-                "rsvp_date",
-                "RSVP must be at least 1 day before the event takes place."
+            return new JsonResponse(
+                $serializer->serialize(["errors" => [
+                    [
+                        "field" => "rsvp_date",
+                        "message" => "RSVP date must be less than start date."
+                    ]
+                ]], 'json'),
+                Response::HTTP_BAD_REQUEST,
+                [],true
             );
         }
 
         if ($rsvpDate <= new \DateTime('now')) {
-            return $this->makeValidationFailureResponse(
-                "rsvp_date",
-                "RSVP date can not be in the past"
-            );
-        }
-
-        if (!$request->getPayload()->get( 'description')) {
-            return $this->makeValidationFailureResponse(
-                "description",
-                "Description is required."
-            );
-        }
-
-        if (!$request->getPayload()->get( 'summary')) {
-            return $this->makeValidationFailureResponse(
-                "summary",
-                "Summary is required."
-            );
-        }
-
-        if (!$request->getPayload()->get( 'location_id')) {
-            return $this->makeValidationFailureResponse(
-                "location_id",
-                "Location is required."
+            return new JsonResponse(
+                $serializer->serialize(["errors" => [
+                    [
+                        "field" => "rsvp_date",
+                        "message" => "RSVP date must be in the future."
+                    ]
+                ]], 'json'),
+                Response::HTTP_BAD_REQUEST,
+                [],true
             );
         }
 
         $location = $locationManager->findLocation($request->getPayload()->get('location_id'));
 
         if (!$location instanceof Location) {
-            return $this->makeValidationFailureResponse(
-                "location_id",
-                "Could not find a location.",
-                Response::HTTP_NOT_FOUND
+            return new JsonResponse(
+                $serializer->serialize(['errors' => [
+                    [
+                        "field" => "location_id",
+                        "message" => "Location not found for ID {$request->getPayload()->get( 'location_id' )}."
+                    ]
+                ]], 'json'),
+                Response::HTTP_NOT_FOUND,
+                [],true
             );
         }
 
@@ -136,16 +173,16 @@ class EventController extends EventrController
             $endDate,
             $rsvpDate,
             $this->getUser(),
-            $request->getPayload()->get( 'private') ?? false
+            $request->getPayload()->get( 'private', false)
         );
 
         $entityManager->persist($event);
         $entityManager->flush();
 
-        return $this->makeSuccessfulResponse(
-            [
+        return new JsonResponse(
+            $serializer->serialize([
                 'event' => $event
-            ],
+            ],'json'),
             Response::HTTP_CREATED,
             [
                 'Location' => $this->generateUrl(
@@ -154,7 +191,7 @@ class EventController extends EventrController
                         'event_id' => $event->getId()
                     ]
                 )
-            ]
+            ],true
         );
     }
 
@@ -164,13 +201,16 @@ class EventController extends EventrController
         methods: ["GET"]
     )]
     public function listEvents(
-        EventManager $eventManager
+        EventManager $eventManager,
+        SerializerInterface $serializer
     ): JsonResponse
     {
-        return $this->makeSuccessfulResponse(
-            [
-                'event' => $eventManager->getActiveEventsByUser($this->getUser())
-            ]
+        return new JsonResponse(
+            $serializer->serialize([
+                'events' => $eventManager->getActiveEventsByUser($this->getUser())
+            ], 'json'),
+            Response::HTTP_OK,
+            [],true
         );
     }
 
@@ -180,13 +220,16 @@ class EventController extends EventrController
         methods: ["GET"]
     )]
     public function listPublicEvents(
-        EventManager $eventManager
+        EventManager $eventManager,
+        SerializerInterface $serializer
     ): JsonResponse
     {
-        return $this->makeSuccessfulResponse(
-            [
-                'event' => $eventManager->getPublicEventsForUser($this->getUser())
-            ]
+        return new JsonResponse(
+            $serializer->serialize([
+                'events' => $eventManager->getPublicEventsForUser($this->getUser())
+            ], 'json'),
+            Response::HTTP_OK,
+            [],true
         );
     }
 
@@ -195,18 +238,21 @@ class EventController extends EventrController
         name: 'api_event_get',
         methods: ["GET"]
     )]
+
     public function getEvent(
-        int          $eventId,
-        EventManager $eventManager
+        int                 $eventId,
+        EventManager        $eventManager,
+        SerializerInterface $serializer
     ): JsonResponse
     {
-        return $this->makeSuccessfulResponse(
-            [
+        return new JsonResponse(
+            $serializer->serialize([
                 'event' => $eventManager->getEvent(
                     $eventId,
                     $this->getUser()
-                )
-            ]
+                )], 'json'),
+            Response::HTTP_OK,
+            [], true
         );
     }
 
@@ -219,7 +265,8 @@ class EventController extends EventrController
         int                    $eventId,
         EventManager           $eventManager,
         StatusManager          $statusManager,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        SerializerInterface    $serializer
     ): JsonResponse
     {
         $event = $eventManager->getEvent(
@@ -228,13 +275,30 @@ class EventController extends EventrController
         );
 
         if (!$event instanceof Event) {
-            return $this->makeValidationFailureResponse('event_id', "Event with ID {$eventId} not found.");
+            return new JsonResponse(
+                $serializer->serialize([
+                    'errors' => [
+                        [
+                            'field' => 'event_id',
+                            "message" => "Event not found for ID {$eventId}."
+                        ]
+                    ]
+                ],'json'),
+                Response::HTTP_NOT_FOUND,
+                [],
+                true
+            );
         }
 
         if ($event->getStatus()->getId() === Status::CANCELLED) {
-            return $this->makeSuccessfulResponse([
-                'event' => $event
-            ]);
+            return new JsonResponse(
+                $serializer->serialize([
+                    'event' => $event
+                ],'json'),
+                Response::HTTP_OK,
+                [],
+                true
+            );
         }
 
         $event->setStatus(
@@ -243,9 +307,14 @@ class EventController extends EventrController
 
         $entityManager->flush();
 
-        return $this->makeSuccessfulResponse([
-            'event' => $event
-        ]);
+        return new JsonResponse(
+            $serializer->serialize([
+                'event' => $event
+            ],'json'),
+            Response::HTTP_OK,
+            [],
+            true
+        );
     }
 
     #[Route(
@@ -256,7 +325,9 @@ class EventController extends EventrController
         int                    $eventId,
         EventManager           $eventManager,
         EntityManagerInterface $entityManager,
-        Request                $request
+        Request                $request,
+        ValidatorInterface     $validator,
+        SerializerInterface    $serializer
     ): JsonResponse
     {
         $event = $eventManager->getEvent(
@@ -265,25 +336,61 @@ class EventController extends EventrController
         );
 
         if (!$event instanceof Event) {
-            return $this->makeValidationFailureResponse('event_id', "Event with ID {$eventId} not found.");
+            return new JsonResponse(
+                $serializer->serialize([
+                    'errors' => [
+                        [
+                            'field' => 'event_id',
+                            "message" => "Event not found for ID {$eventId}."
+                        ]
+                    ]
+                ],'json'),
+                Response::HTTP_NOT_FOUND,
+                [],
+                true
+            );
         }
 
-        if ($request->getPayload()->get('is_private') === null) {
-            return $this->makeValidationFailureResponse('is_private', "is_private is required.");
+        $constraints = new Assert\Collection([
+            'is_private' => new Assert\Type('boolean'),
+        ]);
+
+        $violations = $validator->validate(
+            $request->getPayload()->all()
+            ,$constraints
+        );
+
+        if (count($violations) > 0) {
+            $errors = array_map(function ($violation) {
+                return [
+                    'field' => trim($violation->getPropertyPath(), '[]'),
+                    'message' => $violation->getMessage(),
+                ];
+            },[...$violations]);
+
+            return new JsonResponse(
+                $serializer->serialize(['errors' => $errors], 'json'),
+                Response::HTTP_BAD_REQUEST,
+                [],true
+            );
         }
 
         if ($event->isPrivate() === $request->getPayload()->get( 'is_private')) {
-            return $this->makeSuccessfulResponse([
-                'event' => $event
-            ]);
+            return new JsonResponse(
+                $serializer->serialize(['event' => $event], 'json'),
+                Response::HTTP_OK,
+                [], true
+            );
         }
 
         $event->setPrivate((bool)$request->getPayload()->get('is_private'));
 
         $entityManager->flush();
 
-        return $this->makeSuccessfulResponse([
-            'event' => $event
-        ]);
+        return new JsonResponse(
+            $serializer->serialize(['event' => $event], 'json'),
+            Response::HTTP_OK,
+            [], true
+        );
     }
 }
