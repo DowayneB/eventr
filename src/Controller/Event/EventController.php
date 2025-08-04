@@ -25,7 +25,6 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route(
     "/api/event",
-    name: "event_main"
 )]
 class EventController extends AbstractController
 {
@@ -186,9 +185,9 @@ class EventController extends AbstractController
             Response::HTTP_CREATED,
             [
                 'Location' => $this->generateUrl(
-                    'event_mainapi_event_get',
+                    'api_event_get',
                     [
-                        'event_id' => $event->getId()
+                        'eventId' => $event->getId()
                     ]
                 )
             ],true
@@ -234,11 +233,10 @@ class EventController extends AbstractController
     }
 
     #[Route(
-        "/{event_id}",
+        "/{eventId}",
         name: 'api_event_get',
         methods: ["GET"]
     )]
-
     public function getEvent(
         int                 $eventId,
         EventManager        $eventManager,
