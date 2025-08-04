@@ -59,9 +59,11 @@ class GuestController extends AbstractController
             );
         }
 
-        return $this->makeSuccessfulResponse([
-            'guest' => $guest
-        ]);
+        return new JsonResponse(
+            $serializer->serialize(['guest' => $guest], 'json'),
+            Response::HTTP_OK,
+            [],true
+        );
     }
 
 
