@@ -65,7 +65,7 @@ class LocationController extends AbstractController
         if (!$locationType instanceof LocationType) {
             return new JsonResponse(
                 $serializer->serialize(['errors' => [
-                    'field' => 'location_type',
+                    'field' => 'location_type_id',
                     'message' => "Location type with id {$locationType->getId()} not found",
                 ]], 'json'),
                 Response::HTTP_NOT_FOUND,

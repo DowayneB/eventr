@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -17,7 +18,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[Route('/api/user-profile')]
 final class UserProfileController extends AbstractController
 {
-    #[Route(null, name: 'app_user_profile', methods: ["GET"])]
+    #[Route(null, name: 'api_user_profile', methods: ["GET"])]
     public function index(
         SerializerInterface $serializer
     ): JsonResponse
@@ -29,7 +30,21 @@ final class UserProfileController extends AbstractController
         );
     }
 
-    #[Route(null, name: 'app_user_profile_create', methods: ["POST"])]
+    #[Route("/userId", name: 'api_get_user_profile', methods: ["GET"])]
+    public function getUserProfile(
+        int $userId,
+        UserProfileManager $userProfileManager,
+        SerializerInterface $serializer
+    ): JsonResponse
+    {
+        return new JsonResponse(
+            $serializer->serialize(['user_profile' => $userProfileManager->getUserProfileByUserId($userId)], 'json'),
+            Response::HTTP_OK,
+            [],true
+        );
+    }
+
+    #[Route(null, name: 'api_user_profile_create', methods: ["POST"])]
     public function create(
         Request $request,
         UserInterface $user,
@@ -82,7 +97,10 @@ final class UserProfileController extends AbstractController
 
         return new JsonResponse(
             $serializer->serialize(['user_profile' => $userProfile], 'json'),
-            Response::HTTP_CREATED,true
+            Response::HTTP_CREATED,
+            [
+                'Location' => $this->generateUrl('api_get_user_profile', ['userId' => $user->getId()]),
+            ],true
         );
     }
 }
